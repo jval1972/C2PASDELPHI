@@ -1,0 +1,155 @@
+unit c2pas_memmgr;
+
+interface
+
+type
+  memmanageritem_t = record
+    size: integer;
+    tag: integer;
+    index: integer;
+  end;
+  Pmemmanageritem_t = ^memmanageritem_t;
+
+  memmanageritems_t = array[0..$FFF] of Pmemmanageritem_t;
+  Pmemmanageritems_t = ^memmanageritems_t;
+
+type
+  TMemManager = class
+  private
+    items: Pmemmanageritems_t;
+    numitems: integer;
+    realsize: integer;
+    function item2ptr(const id: integer): Pointer;
+    function ptr2item(const ptr: Pointer): integer;
+  public
+    constructor Create; virtual;
+    destructor Destroy; override;
+    procedure M_Free(ptr: Pointer);
+    procedure M_FreeTags(lowtag, hightag: integer);
+    procedure M_ChangeTag(ptr: Pointer; tag: integer);
+    function M_Malloc(size: integer; tag: integer): pointer;
+    function M_Realloc(ptr: Pointer; size: integer; tag: integer): pointer;
+  end;
+
+
+implementation
+
+constructor TMemManager.Create;
+begin
+  items := nil;
+  numitems := 0;
+  realsize := 0;
+end;
+
+destructor TMemManager.Destroy;
+var
+  i: integer;
+begin
+  for i := numitems - 1 downto 0 do
+    FreeMem(items[i]);
+  FreeMem(items);
+  inherited;
+end;
+
+function TMemManager.item2ptr(const id: integer): Pointer;
+begin
+  result := pointer(integer(items[id]) + SizeOf(memmanageritem_t));
+end;
+
+function TMemManager.ptr2item(const ptr: Pointer): integer;
+begin
+  result := Pmemmanageritem_t(Integer(ptr) - SizeOf(memmanageritem_t)).index;
+end;
+
+procedure TMemManager.M_Free(ptr: Pointer);
+var
+  i: integer;
+begin
+  i := ptr2item(ptr);
+  FreeMem(items[i]);
+  if i < numitems - 1 then
+  begin
+    items[i] := items[numitems - 1];
+    items[numitems - 1] := nil;
+    items[i].index := i;
+  end;
+  dec(numitems);
+end;
+
+procedure TMemManager.M_FreeTags(lowtag, hightag: integer);
+var
+  i: integer;
+begin
+  for i := numitems - 1 downto 0 do
+    if (items[i].tag >= lowtag) and (items[i].tag <= hightag) then
+      M_Free(item2ptr(i));
+end;
+
+procedure TMemManager.M_ChangeTag(ptr: Pointer; tag: integer);
+begin
+  items[ptr2item(ptr)].tag := tag;
+end;
+
+function TMemManager.M_Malloc(size: integer; tag: integer): pointer;
+var
+  i: integer;
+begin
+  if realsize <= numitems then
+  begin
+    realsize := (realsize * 4 div 3 + 64) and (not 7);
+    ReallocMem(items, realsize * SizeOf(Pmemmanageritem_t));
+    for i := numitems + 1 to realsize - 1 do
+      items[i] := nil;
+  end;
+
+  GetMem(items[numitems], size + SizeOf(memmanageritem_t));
+  items[numitems].size := size;
+  items[numitems].tag := tag;
+  items[numitems].index := numitems;
+  Result := item2ptr(numitems);
+  Inc(numitems);
+end;
+
+function TMemManager.M_Realloc(ptr: Pointer; size: integer; tag: integer): pointer;
+var
+  tmp: pointer;
+  copysize: integer;
+  i: integer;
+begin
+  if size = 0 then
+  begin
+    M_Free(ptr);
+    result := nil;
+    exit;
+  end;
+
+  if ptr = nil then
+  begin
+    result := M_Malloc(size, tag);
+    exit;
+  end;
+
+  i := ptr2item(ptr);
+  if items[i].size = size then
+  begin
+    result := ptr;
+    exit;
+  end;
+
+  if size > items[i].size then
+    copysize := items[i].size
+  else
+    copysize := size;
+
+  GetMem(tmp, copysize);
+  Move(ptr^, tmp^, copysize);
+//  memcpy(tmp, ptr, copysize);
+  M_Free(ptr);
+  result := M_Malloc(size, tag);
+//  memcpy(result, tmp, copysize);
+  Move(tmp^, result^, copysize);
+//  memfree(tmp, copysize);
+  FreeMem(tmp);
+end;
+
+end.
