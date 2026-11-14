@@ -264,7 +264,12 @@ end;
 
 procedure TForm1.ConvertNaiveButton1Click(Sender: TObject);
 begin
-  Memo2.Lines.Text := ConvertNaive(Memo1.Lines.Text);
+  Screen.Cursor := crHourGlass;
+  try
+    Memo2.Lines.Text := ConvertNaive(Memo1.Lines.Text);
+  finally
+    Screen.Cursor := crDefault;
+  end;
 end;
 
 end.
