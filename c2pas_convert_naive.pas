@@ -9,6 +9,56 @@ implementation
 uses
   SysUtils, Classes, StrUtils, c2pas_memmgr, c2pas_utils;
 
+procedure splitcomment(var sin: string; out scomment: string);
+var
+  p1, p2: integer;
+
+  function _split1(const c1, c2: string): boolean;
+  var
+    ii: integer;
+  begin
+    p1 := Pos(c1, sin);
+    if p1 > 0 then
+    begin
+      p2 := Pos(c2, sin);
+      if p2 > 0 then
+      begin
+        scomment := '';
+        for ii := p1 to p2 + Length(c2) - 1 do
+        begin
+          scomment := scomment + sin[ii];
+          sin[ii] := ' ';
+        end;
+        Result := True;
+        Exit;
+      end;
+    end;
+    Result := False;
+  end;
+
+begin
+  p1 := Pos('//', sin);
+  if p1 > 0 then
+  begin
+    scomment := Copy(sin, p1, Length(sin) - p1 + 1);
+    SetLength(sin, p1 - 1);
+    Exit;
+  end;
+
+  // ********************************
+//  scomment := '';
+//  Exit;
+  // ********************************
+  if _split1('(*', '*)') then
+    Exit;
+  if _split1('{', '}') then
+    Exit;
+  if _split1('/*', '*/') then
+    Exit;
+
+  scomment := '';
+end;
+
 function ConvertNaive_Pass1(const sinp: string): string;
 begin
   result := sinp;
@@ -96,8 +146,10 @@ function ConvertNaive_Pass2(const sinp: string): string;
 var
   s, s2: TStringList;
   i, j: integer;
-  stmp, stmpt: string;
+  stmp, stmp2, stmpt: string;
   nspaces: integer;
+  scomment: string;
+  changed: boolean;
 begin
   s := TStringList.Create;
   s2 := TStringList.Create;
@@ -118,8 +170,15 @@ begin
 
     stmp := Trim(stmp);
 
+    stmp2 := stmp;
+
+    splitcomment(stmp, scomment);
+    stmp := Trim(stmp);
+
     if (lastword(stmp) = 'begin') and (Length(stmp) > 5) then
     begin
+      changed := False;
+
       SetLength(stmp, Length(stmp) - 5);
       stmpt := Trim(stmp);
       if stmpt <> '' then
@@ -129,14 +188,20 @@ begin
           if stmp[Length(stmp)] <> ' ' then
             stmp := stmp + ' ';
           stmp := stmp + 'then';
+          changed := True;
         end;
         if firstword(stmpt) = 'for' then
         begin
           if stmp[Length(stmp)] <> ' ' then
             stmp := stmp + ' ';
           stmp := stmp + 'do';
+          changed := True;
         end;
       end;
+
+      stmp := stmp + ' ' + scomment;
+
+      stmp := Trim(stmp);
 
       for j := 1 to nspaces do
         stmp := ' ' + stmp;
@@ -151,8 +216,8 @@ begin
     else
     begin
       for j := 1 to nspaces do
-        stmp := ' ' + stmp;
-      s2.Add(stmp);
+        stmp2 := ' ' + stmp2;
+      s2.Add(stmp2);
     end;
   end;
 
@@ -198,6 +263,49 @@ begin
         end;
   Result := True;
 end;
+
+function isintidentifier(const stmp1: string): boolean;
+var
+  i: integer;
+  stmp: string;
+  start: integer;
+begin
+  stmp := Trim(stmp1);
+  Result := False;
+  if stmp = '' then
+    Exit;
+
+  if stmp[1] = '$' then
+  begin
+    if Length(stmp) < 2 then
+      Exit;
+    start := 2;
+  end
+  else if (stmp[1] = '-') and (Length(stmp) >= 2) and (stmp[2] in ['1'..'9', '0']) then
+  begin
+    start := 2;
+  end
+  else
+    start := 1;
+
+  for i := start to length(stmp) do
+    if not (stmp[i] in ['A'..'Z']) then
+      if not (stmp[i] in ['a'..'z']) then
+        if not (stmp[i] in ['1'..'9', '0', '_', '[',']']) then
+        begin
+          if stmp[i] = '.' then
+            if i < Length(stmp) then
+              if stmp[i + 1] in ['A'..'Z', 'a'..'z'] then
+                Continue;
+          if stmp[i] = '-' then
+            if i > 1 then
+              if stmp[i - 1] = '[' then
+                Continue;
+          Exit;
+        end;
+  Result := True;
+end;
+
 
 function isinsingleparenthesis(const stmp1: string): boolean;
 var
@@ -538,7 +646,7 @@ begin
     end
     else if (Pos('if (', stmp) = 1) or (Pos('if(', stmp) = 1) then
     begin
-      if stmp[length(stmp)] = ')' then
+      if (stmp[length(stmp)] = ')') and (Pos(' then ', stmp) = 0) then
       begin
         stmp[1] := ' ';
         stmp[2] := ' ';
@@ -946,6 +1054,213 @@ var
     end;
   end;
 
+  procedure resolve_for;
+  var
+    first, last: string;
+    sfor: string;
+    s1, s2, s3, ftmp, ftmp2, ftmp3, ftmp4: string;
+    pp1, pp2, pp3, pp4: integer;
+    ipp1, ipp2, ipp3: integer;
+    sdiv: Char;
+    scounter, sfrom, sdir, sto: string;
+    ii, cnt1, cnt2: integer;
+  begin
+    first := firstword(stmp);
+    if first <> 'for' then
+      Exit;
+
+    last := lastword(stmp);
+    if last <> 'do' then
+      Exit;
+
+    sfor := Copy(stmp, 4, Length(stmp) - 6);
+    sfor := Trim(sfor);
+    if sfor = '' then
+      Exit;
+
+    if isinsingleparenthesis(sfor) then
+    begin
+      Delete(sfor, 1, 1);
+      SetLength(sfor, Length(sfor) - 1);
+    end;
+
+    if sfor = '' then
+      Exit;
+
+    splitstring(sfor, s1, ftmp, ';');
+    if Pos(':=', s1) = 0 then
+      Exit;
+
+    splitstring(ftmp, s2, s3, ';');
+    if Pos(';', s3) > 0 then
+      Exit;
+    if (Pos('++', s3) = 0) and (Pos('--', s3) = 0) then
+      Exit;
+
+    s1 := Trim(s1);
+    s2 := Trim(s2);
+    s3 := Trim(s3);
+
+    if Pos('int ', s1) = 1 then
+    begin
+      splitstring(s1, ftmp, ftmp2);
+      ftmp2 := Trim(ftmp2);
+    end
+    else
+      ftmp2 := s1;
+
+    splitstring(ftmp2, scounter, sfrom);
+
+    scounter := Trim(scounter);
+    if scounter = '' then
+      Exit;
+
+    if not isidentifier(scounter) then
+      Exit;
+
+    sfrom := Trim(sfrom);
+    if sfrom = '' then
+      exit;
+
+    if sfrom[1] = ':' then
+      Delete(sfrom, 1, 1);
+    if sfrom = '' then
+      exit;
+
+    if sfrom[1] = '=' then
+      Delete(sfrom, 1, 1);
+    sfrom := Trim(sfrom);
+    if sfrom = '' then
+      exit;
+
+    if not isidentifier(sfrom) then
+      Exit;
+
+    pp1 := Pos('<', s2);
+    pp2 := Pos('>', s2);
+    pp3 := Pos('=', s2);
+
+    if pp1 > 0 then
+      ipp1 := 1
+    else
+      ipp1 := 0;
+    if pp2 > 0 then
+      ipp2 := 1
+    else
+      ipp2 := 0;
+    if pp3 > 0 then
+      ipp3 := 1
+    else
+      ipp3 := 0;
+
+    if ipp1 + ipp2 + ipp3 <> 1 then
+      Exit;
+
+    if pp1 > 0 then
+      splitstring(s2, ftmp, ftmp2, '<')
+    else if pp2 > 0 then
+      splitstring(s2, ftmp, ftmp2, '<')
+    else
+      splitstring(s2, ftmp, ftmp2, '=');
+
+    if Trim(ftmp) <> scounter then
+      Exit;
+
+    ftmp2 := Trim(ftmp2);
+    if not isintidentifier(ftmp2) then
+    begin
+      if CountChr(ftmp2, '/') + CountChr(ftmp2, '\') <> 1 then
+        Exit;
+
+      sdiv := #0;
+
+      pp4 := Pos('/', ftmp2);
+      if pp4 > 0 then
+        sdiv := '/'
+      else
+      begin
+        pp4 := Pos('\', ftmp2);
+        if pp4 > 0 then
+          sdiv := '\';
+      end;
+      if sdiv = #0 then
+        Exit;
+
+      cnt1 := 0;
+      for ii := pp4 - 1 downto 1 do
+        if ftmp2[ii] = ' ' then
+          Inc(cnt1)
+        else
+          Break;
+      for ii := pp4 + 1 to Length(ftmp2) do
+        if ftmp2[ii] = ' ' then
+          Inc(cnt1)
+        else
+          Break;
+
+      cnt2 := 0;
+      for ii := 1 to Length(ftmp2) do
+        if ftmp2[ii] = ' ' then
+          Inc(cnt2);
+
+      if cnt1 <> cnt2 then
+        Exit;
+
+      splitstring(ftmp2, ftmp3, ftmp4, sdiv);
+      if isintidentifier(ftmp3) and isintidentifier(ftmp4) then
+        ftmp2 := '(' + ftmp3 + ' div ' + ftmp4 + ')';
+    end;
+
+    if pp1 > 0 then
+    begin
+      if IsInteger(ftmp2) then
+        sto := IntToStr(StrToInt(ftmp2) - 1) + ' {' + ftmp2 + ' - 1}'
+      else
+        sto := ftmp2 + ' - 1';
+    end
+    else if pp2 > 0 then
+    begin
+      if IsInteger(ftmp2) then
+        sto := IntToStr(StrToInt(ftmp2) + 1) + ' {' + ftmp2 + ' + 1}'
+      else
+        sto := ftmp2 + ' + 1';
+    end
+    else
+      sto := ftmp2;
+
+    pp1 := Pos('++', s3);
+    pp2 := Pos('--', s3);
+
+    if (pp1 > 0) = (pp2 > 0) then
+      Exit;
+
+    sdir := '';
+    if pp1 > 0 then
+      sdir := 'to'
+    else if pp2 > 0 then
+      sdir := 'downto';
+    if sdir = '' then
+      Exit;
+
+    if pp1 > 0 then
+    begin
+      s3[pp1] := ' ';
+      s3[pp1 + 1] := ' ';
+    end
+    else
+    begin
+      s3[pp2] := ' ';
+      s3[pp2 + 1] := ' ';
+    end;
+
+    s3 := Trim(s3);
+
+    if s3 <> scounter then
+      Exit;
+
+    stmp := 'for ' + scounter + ' := ' + sfrom + ' ' + sdir + ' ' + sto + ' do';
+  end;
+
 begin
   s := TStringList.Create;
   s2 := TStringList.Create;
@@ -1041,6 +1356,9 @@ begin
       while resolve_pointers2 do
       begin
       end;
+      resolve_for;
+      if stmp = 'while 1 do' then
+        stmp := 'while true do';
     end;
 
     for j := 1 to nspaces do
