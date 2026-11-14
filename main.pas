@@ -23,6 +23,7 @@ type
     Memo2: TMemo;
     ConvertNaiveButton1: TSpeedButton;
     Panel2: TPanel;
+    Bevel1: TBevel;
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure NewButton1Click(Sender: TObject);
