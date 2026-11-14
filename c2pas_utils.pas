@@ -50,6 +50,8 @@ function pascalnumber(s: string): string;
 
 function checkbracketsclosed(const expr: string; b1, b2: Char): boolean;
 
+function CountChr(const s: string; const c: Char): integer;
+
 type
   TDNumberList = class
   private
@@ -131,16 +133,18 @@ end;
 
 function secondword(const inp: string; const splitter: string = ' '): string; overload;
 var
-  tmp: string;
+  tmp, tmp2: string;
 begin
-  splitstring(inp, tmp, result, splitter);
+  splitstring(inp, tmp, tmp2, splitter);
+  Result := firstword(tmp2, splitter);
 end;
 
 function secondword(const inp: string; const splitters: charset_t): string; overload;
 var
-  tmp: string;
+  tmp, tmp2: string;
 begin
-  splitstring(inp, tmp, result, splitters);
+  splitstring(inp, tmp, tmp2, splitters);
+  Result := firstword(tmp2, splitters);
 end;
 
 function lastword(const inp: string; const splitter: string = ' '): string; overload;
@@ -413,6 +417,16 @@ begin
   result := plevel = 0;
 end;
 
+function CountChr(const s: string; const c: Char): integer;
+var
+  i: integer;
+begin
+  Result := 0;
+  for i := 1 to Length(s) do
+    if s[i] = c then
+      inc(Result);
+end;
+
 ////////////////////////////////////////////////////////////////////////////////
 // TDNumberList
 constructor TDNumberList.Create;
@@ -493,7 +507,5 @@ begin
   fList := nil;
   fNumItems := 0;
 end;
-
-
 
 end.
