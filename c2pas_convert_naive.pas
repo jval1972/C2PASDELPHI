@@ -847,6 +847,91 @@ var
   stmp, token, rest: string;
   p1, p2, p3, start: integer;
   nspaces: integer;
+
+  function resolve_pointers: boolean;
+  var
+    ii, jj: integer;
+    s2: string;
+  begin
+    Result := False;
+    token := '';
+    for ii := 1 to Length(stmp) - 3 do
+    begin
+      if (stmp[ii] = '(') and (stmp[ii + 1] = '*') then
+      begin
+        p3 := 0;
+        for jj := ii + 2 to Length(stmp) do
+        begin
+          if stmp[jj] = ')' then
+          begin
+            p3 := jj - 1;
+            break;
+          end;
+          token := token + stmp[jj];
+        end;
+        token := Trim(token);
+        if (token <> '') and (p3 > 0) then
+          if isidentifier(token) then
+          begin
+            s2 := '';
+            for jj := 1 to ii do
+              s2 := s2 + stmp[jj];
+            for jj := 1 to Length(token) do
+              s2 := s2 + token[jj];
+            s2 := s2 + '^';
+            for jj := p3 + 1 to Length(stmp) do
+              s2 := s2 + stmp[jj];
+            stmp := s2;
+            Result := True;
+            Exit;
+          end;
+
+      end;
+    end;
+  end;
+
+  function resolve_pointers2: boolean;
+  var
+    ii, jj: integer;
+    s2: string;
+  begin
+    Result := False;
+    token := '';
+    for ii := 1 to Length(stmp) - 5 do
+    begin
+      if (stmp[ii] = 'i') and (stmp[ii + 1] = 'f') and (stmp[ii + 2] = ' ') and  (stmp[ii + 3] = '*') then
+      begin
+        p3 := 0;
+        for jj := ii + 4 to Length(stmp) do
+        begin
+          if stmp[jj] = ' ' then
+          begin
+            p3 := jj - 1;
+            break;
+          end;
+          token := token + stmp[jj];
+        end;
+        token := Trim(token);
+        if (token <> '') and (p3 > 0) then
+          if isidentifier(token) then
+          begin
+            s2 := '';
+            for jj := 1 to ii + 2 do
+              s2 := s2 + stmp[jj];
+            for jj := 1 to Length(token) do
+              s2 := s2 + token[jj];
+            s2 := s2 + '^';
+            for jj := p3 + 1 to Length(stmp) do
+              s2 := s2 + stmp[jj];
+            stmp := s2;
+            Result := True;
+            Exit;
+          end;
+
+      end;
+    end;
+  end;
+
 begin
   s := TStringList.Create;
   s2 := TStringList.Create;
@@ -865,6 +950,9 @@ begin
         break;
     end;
     stmp := Trim(stmp);
+
+    p1 := 0;
+    p2 := 0;
 
     if Pos('for ', stmp) = 0 then
     begin
@@ -929,6 +1017,16 @@ begin
         end;
       end;
 
+    end;
+
+    if (p1 = 0) and (p2 = 0) then
+    begin
+      while resolve_pointers do
+      begin
+      end;
+      while resolve_pointers2 do
+      begin
+      end;
     end;
 
     for j := 1 to nspaces do
