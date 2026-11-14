@@ -52,6 +52,8 @@ function checkbracketsclosed(const expr: string; b1, b2: Char): boolean;
 
 function CountChr(const s: string; const c: Char): integer;
 
+function textnospaces(const s: string): string;
+
 type
   TDNumberList = class
   private
@@ -425,6 +427,16 @@ begin
   for i := 1 to Length(s) do
     if s[i] = c then
       inc(Result);
+end;
+
+function textnospaces(const s: string): string;
+var
+  i: integer;
+begin
+  Result := '';
+  for i := 1 to Length(s) do
+    if s[i] <> ' ' then
+      Result := Result + s[i];
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

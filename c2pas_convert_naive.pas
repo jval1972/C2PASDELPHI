@@ -199,6 +199,20 @@ begin
   Result := True;
 end;
 
+function isinsingleparenthesis(const stmp1: string): boolean;
+var
+  stmp: string;
+begin
+  stmp := Trim(stmp1);
+  Result := False;
+
+  if CountChr(stmp, '(') = 1 then
+    if CountChr(stmp, ')') = 1 then
+      if stmp[1] = '(' then
+        if stmp[Length(stmp)] = ')' then
+          Result := True;
+end;
+
 function ConvertNaive_Pass3(const sinp: string): string;
 var
   s: TStringList;
@@ -269,7 +283,7 @@ var
     end;
 
     if isidentifier(stmp1) then
-      if isidentifier(stmp2) then
+      if isidentifier(stmp2) or isinsingleparenthesis(stmp2) then
       begin
         praxi := stmp[p];
         if praxi = '|' then
