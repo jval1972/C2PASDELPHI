@@ -90,8 +90,8 @@ MaxStackSize=1048576
 ImageBase=4194304
 ExeDescription=
 [Directories]
-OutputDir=
-UnitOutputDir=.\dcu
+OutputDir=..\bin
+UnitOutputDir=..\dcu
 PackageDLLOutputDir=
 PackageDCPOutputDir=
 SearchPath=
@@ -130,5 +130,9 @@ Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
 Count=1
 Item0=C:\Program Files\Borland\Delphi7\Lib
 [HistoryLists\hlUnitOutputDirectory]
+Count=2
+Item0=..\dcu
+Item1=.\dcu
+[HistoryLists\hlOutputDirectorry]
 Count=1
-Item0=.\dcu
+Item0=..\bin
