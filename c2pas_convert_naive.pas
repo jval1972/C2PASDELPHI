@@ -412,7 +412,10 @@ var
     a_items := string2stringlist(data, ',');
 
     if a_items.Count < 2 then
+    begin
+      a_items.Free;
       Exit;
+    end;
 
     for ii := a_items.Count - 1 downto 0 do
     begin
@@ -425,7 +428,7 @@ var
     if s2.Count > 0 then
       if Trim(s2.Strings[s2.Count - 1]) <> '' then
         s2.Add('');
-        
+
     s2.Add('const');
     s2.Add('  ' + s_name + ': array[0..' + IntToStr(cntitems - 1) + '] of ' + s_type + ' = (');
 
@@ -451,6 +454,8 @@ var
 
     for ii := i + 1 to endpos do
       s.Strings[ii] := '$SKIP_THIS_LINE';
+
+    a_items.Free;
   end;
 
 begin
