@@ -133,6 +133,7 @@ begin
   result := StringReplace(result, ' 0x', ' $', [rfReplaceAll, rfIgnoreCase]);
   result := StringReplace(result, '(0x', '($', [rfReplaceAll, rfIgnoreCase]);
   result := StringReplace(result, '[0x', '[$', [rfReplaceAll, rfIgnoreCase]);
+  result := StringReplace(result, ',0x', ',$', [rfReplaceAll, rfIgnoreCase]);
   result := StringReplace(result, '#endif', '{$ENDIF}', [rfReplaceAll, rfIgnoreCase]);
   result := StringReplace(result, '#else', '{$ELSE}', [rfReplaceAll, rfIgnoreCase]);
   result := StringReplace(result, #254#250, '|:=', [rfReplaceAll, rfIgnoreCase]);
