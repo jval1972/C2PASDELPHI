@@ -658,7 +658,7 @@ begin
     end
     else if (Pos('while (', stmp) = 1) or (Pos('while(', stmp) = 1) then
     begin
-      if stmp[length(stmp)] = ')' then
+      if (stmp[length(stmp)] = ')') and (Pos(' do ', stmp) = 0) then
       begin
         stmp[1] := ' ';
         stmp[2] := ' ';
