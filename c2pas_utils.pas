@@ -74,6 +74,8 @@ type
     property Numbers[Index: Integer]: integer read Get write Put; default;
   end;
 
+function string2stringlist(const s: string; const c: char): TStringList;
+  
 implementation
 
 uses
@@ -518,6 +520,23 @@ begin
   ReallocMem(fList, 0);
   fList := nil;
   fNumItems := 0;
+end;
+
+function string2stringlist(const s: string; const c: char): TStringList;
+var
+  i: integer;
+  tmp: string;
+begin
+  tmp := '';
+  for i := 1 to length(s) do
+  begin
+    if s[i] = c then
+      tmp := tmp + #13#10
+    else
+      tmp := tmp + s[i];
+  end;
+  Result := TStringList.Create;
+  Result.Text := tmp;
 end;
 
 end.

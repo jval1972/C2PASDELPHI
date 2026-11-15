@@ -59,6 +59,146 @@ begin
   scomment := '';
 end;
 
+function isCtypename(const s: string): boolean;
+var
+  s1: string;
+begin
+  s1 := LowerCase(s);
+  Result :=
+    (s1 = 'char') or
+    (s1 = 'byte') or
+    (s1 = 'long') or
+    (s1 = 'int') or
+    (s1 = 'bool') or
+    (s1 = 'double') or
+    (s1 = 'float') or
+    (s1 = 'fixed_t') or
+    (s1 = 'int8_t') or
+    (s1 = 'uint8_t') or
+    (s1 = 'int16_t') or
+    (s1 = 'uint16_t') or
+    (s1 = 'int32_t') or
+    (s1 = 'uint32_t') or
+    (s1 = 'int64_t') or
+    (s1 = 'uint64_t');
+end;
+
+function isidentifier(const stmp1: string): boolean;
+var
+  i: integer;
+  stmp: string;
+  start: integer;
+begin
+  stmp := Trim(stmp1);
+  Result := False;
+  if stmp = '' then
+    Exit;
+
+  if stmp[1] = '$' then
+  begin
+    if Length(stmp) < 2 then
+      Exit;
+    start := 2;
+  end
+  else if (stmp[1] = '-') and (Length(stmp) >= 2) and (stmp[2] in ['1'..'9', '0']) then
+  begin
+    start := 2;
+  end
+  else
+    start := 1;
+
+  for i := start to length(stmp) do
+    if not (stmp[i] in ['A'..'Z']) then
+      if not (stmp[i] in ['a'..'z']) then
+        if not (stmp[i] in ['1'..'9', '0', '_', '.', '/','[',']']) then
+        begin
+          if stmp[i] = '-' then
+            if i > 1 then
+              if stmp[i - 1] = '[' then
+                Continue;
+          Exit;
+        end;
+  Result := True;
+end;
+
+function isintidentifier(const stmp1: string): boolean;
+var
+  i: integer;
+  stmp: string;
+  start: integer;
+begin
+  stmp := Trim(stmp1);
+  Result := False;
+  if stmp = '' then
+    Exit;
+
+  if stmp[1] = '$' then
+  begin
+    if Length(stmp) < 2 then
+      Exit;
+    start := 2;
+  end
+  else if (stmp[1] = '-') and (Length(stmp) >= 2) and (stmp[2] in ['1'..'9', '0']) then
+  begin
+    start := 2;
+  end
+  else
+    start := 1;
+
+  for i := start to length(stmp) do
+    if not (stmp[i] in ['A'..'Z']) then
+      if not (stmp[i] in ['a'..'z']) then
+        if not (stmp[i] in ['1'..'9', '0', '_', '[',']']) then
+        begin
+          if stmp[i] = '.' then
+            if i < Length(stmp) then
+              if stmp[i + 1] in ['A'..'Z', 'a'..'z'] then
+                Continue;
+          if stmp[i] = '-' then
+            if i > 1 then
+              if stmp[i - 1] = '[' then
+                Continue;
+          Exit;
+        end;
+  Result := True;
+end;
+
+function issingleidentifier(const stmp1: string): boolean;
+var
+  i: integer;
+  stmp: string;
+begin
+  stmp := Trim(stmp1);
+  Result := False;
+  if stmp = '' then
+    Exit;
+
+  if stmp[1] = '$' then
+    Exit;
+
+  for i := 1 to length(stmp) do
+    if not (stmp[i] in ['A'..'Z']) then
+      if not (stmp[i] in ['a'..'z']) then
+        if not (stmp[i] in ['1'..'9', '0', '_']) then
+          Exit;
+
+  Result := True;
+end;
+
+function isinsingleparenthesis(const stmp1: string): boolean;
+var
+  stmp: string;
+begin
+  stmp := Trim(stmp1);
+  Result := False;
+
+  if CountChr(stmp, '(') = 1 then
+    if CountChr(stmp, ')') = 1 then
+      if stmp[1] = '(' then
+        if stmp[Length(stmp)] = ')' then
+          Result := True;
+end;
+
 function ConvertNaive_Pass1(const sinp: string): string;
 begin
   result := sinp;
@@ -151,6 +291,168 @@ var
   nspaces: integer;
   scomment: string;
   changed: boolean;
+
+  procedure check_array_const;
+  var
+    stmp1: string;
+    t1, t2, t3: string;
+    fw, sw: string;
+    s_type: string;
+    s_name: string;
+    ii: integer;
+    endpos, startpos: integer;
+    cntitems: integer;
+    data, line, restbegin, comment1: string;
+    a_items: TStringList;
+  begin
+    if Pos('[]', stmp) = 0 then
+      Exit;
+
+    if Pos(':=', stmp) = 0 then
+      Exit;
+
+    stmp1 := stmp;
+    fw := firstword(stmp1);
+    if fw = 'static' then
+    begin
+      splitstring(stmp1, t1, t2);
+      stmp1 := t2;
+      fw := firstword(stmp1);
+    end;
+
+    if fw <> 'const' then
+      Exit;
+
+    splitstring(stmp1, t1, t2);
+    stmp1 := t2;
+    fw := firstword(stmp1);
+
+    if not isCtypename(fw) then
+      Exit;
+
+    s_type := fw;
+
+    splitstring(stmp1, t1, t2);
+    stmp1 := t2;
+    splitstring(t2, fw, sw);
+
+    if (Pos('[]', fw) = Length(fw) - 1) or (sw = '[]') then
+    else
+      Exit;
+
+    if sw <> '[]' then
+      SetLength(fw, Length(fw) - 2);
+
+    s_name := fw;
+
+    if not issingleidentifier(s_name) then
+      Exit;
+
+    splitstring(stmp1, t1, t2);
+    stmp1 := t2;
+    if sw = '[]' then
+    begin
+      splitstring(stmp1, t1, t2);
+      stmp1 := t2;
+    end;
+
+    fw := firstword(stmp1);
+    if fw <> ':=' then
+      Exit;
+
+    sw := secondword(stmp1);
+    startpos := i;
+    restbegin := '';
+    if Trim(sw) = '' then
+      if i < s.Count - 1 then
+        if Trim(s.Strings[i + 1]) = 'begin' then
+        begin
+          sw := 'begin';
+          splitstring(Trim(s.Strings[i + 1]), t3, restbegin);
+          startpos := i + 1;
+        end;
+
+    if sw <> 'begin' then
+      Exit;
+
+    endpos := -1;
+    data := '';
+
+    for ii := startpos to s.Count - 1 do
+    begin
+      if ii = startpos then
+        line := Trim(restbegin)
+      else
+        line := Trim(s.Strings[ii]);
+      splitcomment(line, comment1);
+      line := Trim(line);
+      if line = '' then
+        Continue;
+
+      if data <> '' then
+        data := data + ' ';
+      data := data + line;
+      if lastword(line) = 'end' then
+        SetLength(data, Length(data) - 3)
+      else if lastword(line) = 'end;' then
+        SetLength(data, Length(data) - 4)
+      else
+        Continue;
+
+      endpos := ii;
+      Break;
+    end;
+
+    if endpos = -1 then
+      Exit;
+
+    if Pos(',', data) = 0 then
+      Exit;
+
+    a_items := string2stringlist(data, ',');
+
+    if a_items.Count < 2 then
+      Exit;
+
+    for ii := a_items.Count - 1 downto 0 do
+    begin
+      a_items.Strings[ii] := Trim(a_items.Strings[ii]);
+      // if a_items.Strings[ii] = '' then a_items.delete(ii);
+    end;
+
+    cntitems := a_items.Count;
+
+    if s2.Count > 0 then
+      if Trim(s2.Strings[s2.Count - 1]) <> '' then
+        s2.Add('');
+        
+    s2.Add('const');
+    s2.Add('  ' + s_name + ': array[0..' + IntToStr(cntitems - 1) + '] of ' + s_type + ' = (');
+
+    line := '    ';
+    for ii := 0 to a_items.Count - 1 do
+    begin
+      line := line + a_items.Strings[ii];
+      if ii < a_items.Count - 1 then
+        line := line + ', ';
+      if Length(line) >= 78 then
+      begin
+        s2.Add(line);
+        line := '    ';
+      end;
+    end;
+
+    if Trim(line) <> '' then
+      s2.Add(line);
+
+    nspaces := 2;
+    stmp := ');';
+    stmp2 := stmp;
+
+    for ii := i + 1 to endpos do
+      s.Strings[ii] := '$SKIP_THIS_LINE';
+  end;
+
 begin
   s := TStringList.Create;
   s2 := TStringList.Create;
@@ -160,6 +462,9 @@ begin
   for i := 0 to s.Count - 1 do
   begin
     stmp := s.Strings[i];
+    if stmp = '$SKIP_THIS_LINE' then
+      Continue;
+
     nspaces := 0;
     for j := 1 to length(stmp) do
     begin
@@ -176,6 +481,8 @@ begin
     splitcomment(stmp, scomment);
     stmp := Trim(stmp);
 
+    check_array_const;
+    
     if (lastword(stmp) = 'begin') and (Length(stmp) > 5) then
     begin
       changed := False;
@@ -225,101 +532,6 @@ begin
   result := s2.Text;
   s.Free;
   s2.Free;
-end;
-
-function isidentifier(const stmp1: string): boolean;
-var
-  i: integer;
-  stmp: string;
-  start: integer;
-begin
-  stmp := Trim(stmp1);
-  Result := False;
-  if stmp = '' then
-    Exit;
-
-  if stmp[1] = '$' then
-  begin
-    if Length(stmp) < 2 then
-      Exit;
-    start := 2;
-  end
-  else if (stmp[1] = '-') and (Length(stmp) >= 2) and (stmp[2] in ['1'..'9', '0']) then
-  begin
-    start := 2;
-  end
-  else
-    start := 1;
-
-  for i := start to length(stmp) do
-    if not (stmp[i] in ['A'..'Z']) then
-      if not (stmp[i] in ['a'..'z']) then
-        if not (stmp[i] in ['1'..'9', '0', '_', '.', '/','[',']']) then
-        begin
-          if stmp[i] = '-' then
-            if i > 1 then
-              if stmp[i - 1] = '[' then
-                Continue;
-          Exit;
-        end;
-  Result := True;
-end;
-
-function isintidentifier(const stmp1: string): boolean;
-var
-  i: integer;
-  stmp: string;
-  start: integer;
-begin
-  stmp := Trim(stmp1);
-  Result := False;
-  if stmp = '' then
-    Exit;
-
-  if stmp[1] = '$' then
-  begin
-    if Length(stmp) < 2 then
-      Exit;
-    start := 2;
-  end
-  else if (stmp[1] = '-') and (Length(stmp) >= 2) and (stmp[2] in ['1'..'9', '0']) then
-  begin
-    start := 2;
-  end
-  else
-    start := 1;
-
-  for i := start to length(stmp) do
-    if not (stmp[i] in ['A'..'Z']) then
-      if not (stmp[i] in ['a'..'z']) then
-        if not (stmp[i] in ['1'..'9', '0', '_', '[',']']) then
-        begin
-          if stmp[i] = '.' then
-            if i < Length(stmp) then
-              if stmp[i + 1] in ['A'..'Z', 'a'..'z'] then
-                Continue;
-          if stmp[i] = '-' then
-            if i > 1 then
-              if stmp[i - 1] = '[' then
-                Continue;
-          Exit;
-        end;
-  Result := True;
-end;
-
-
-function isinsingleparenthesis(const stmp1: string): boolean;
-var
-  stmp: string;
-begin
-  stmp := Trim(stmp1);
-  Result := False;
-
-  if CountChr(stmp, '(') = 1 then
-    if CountChr(stmp, ')') = 1 then
-      if stmp[1] = '(' then
-        if stmp[Length(stmp)] = ')' then
-          Result := True;
 end;
 
 function ConvertNaive_Pass3(const sinp: string): string;
