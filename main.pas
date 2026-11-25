@@ -84,6 +84,7 @@ type
     procedure DoSave(const fname: string);
     procedure DoLoad(const fname: string);
     procedure DoConvert;
+    procedure DoConvert_Naive;
     procedure SetFileName(const fname: string);
   public
     { Public declarations }
@@ -117,7 +118,7 @@ begin
   Memo1.Lines.LoadFromFile(fname);
   Memo2.Lines.Clear;
   SetFileName(fname);
-  DoConvert;
+  DoConvert_Naive;
 end;
 
 procedure TForm1.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -292,6 +293,16 @@ begin
   Screen.Cursor := crDefault;
 end;
 
+procedure TForm1.DoConvert_Naive;
+begin
+  Screen.Cursor := crHourGlass;
+  try
+    Memo2.Lines.Text := ConvertNaive(Memo1.Lines.Text);
+  finally
+    Screen.Cursor := crDefault;
+  end;
+end;
+
 procedure TForm1.ConvertButton1Click(Sender: TObject);
 begin
   DoConvert;
@@ -304,12 +315,7 @@ end;
 
 procedure TForm1.ConvertNaiveButton1Click(Sender: TObject);
 begin
-  Screen.Cursor := crHourGlass;
-  try
-    Memo2.Lines.Text := ConvertNaive(Memo1.Lines.Text);
-  finally
-    Screen.Cursor := crDefault;
-  end;
+  DoConvert_Naive;
 end;
 
 end.

@@ -1723,7 +1723,7 @@ object Form1: TForm1
       OnClick = ExitButton1Click
     end
     object ConvertButton1: TSpeedButton
-      Left = 408
+      Left = 568
       Top = 3
       Width = 145
       Height = 64
@@ -1832,7 +1832,7 @@ object Form1: TForm1
       OnClick = ConvertButton1Click
     end
     object ConvertNaiveButton1: TSpeedButton
-      Left = 560
+      Left = 416
       Top = 3
       Width = 145
       Height = 64
