@@ -1042,6 +1042,7 @@ object Form1: TForm1
     0000000000000000000000000000000000000000000000000000000000000000
     0000000000000000000000000000000000000000000000000000000000000000
     00000000000000000000000000000000000000000000000000000000}
+  Menu = MainMenu1
   OldCreateOrder = False
   Position = poDefault
   ShowHint = True
@@ -1930,7 +1931,7 @@ object Form1: TForm1
     Left = 0
     Top = 68
     Width = 736
-    Height = 386
+    Height = 366
     Align = alClient
     BevelOuter = bvNone
     Caption = ' '
@@ -1939,7 +1940,7 @@ object Form1: TForm1
       Left = 0
       Top = 0
       Width = 500
-      Height = 386
+      Height = 366
       Align = alLeft
       Font.Charset = GREEK_CHARSET
       Font.Color = clBlack
@@ -1955,7 +1956,7 @@ object Form1: TForm1
       Left = 500
       Top = 0
       Width = 236
-      Height = 386
+      Height = 366
       Align = alClient
       Font.Charset = GREEK_CHARSET
       Font.Color = clBlack
@@ -1980,5 +1981,56 @@ object Form1: TForm1
     Filter = 'C source files (*.c; *.cpp; *.h)|*.c;*.cpp;*.h|All files|*.*'
     Left = 264
     Top = 56
+  end
+  object MainMenu1: TMainMenu
+    Left = 208
+    Top = 196
+    object File1: TMenuItem
+      Caption = 'File'
+      object New1: TMenuItem
+        Caption = 'New'
+        OnClick = NewButton1Click
+      end
+      object Open1: TMenuItem
+        Caption = 'Open'
+        OnClick = OpenButton1Click
+      end
+      object N1: TMenuItem
+        Caption = '-'
+      end
+      object Save1: TMenuItem
+        Caption = 'Save'
+        OnClick = SaveButton1Click
+      end
+      object SaveAs1: TMenuItem
+        Caption = 'Save As'
+        OnClick = SaveAsButton1Click
+      end
+      object N2: TMenuItem
+        Caption = '-'
+      end
+      object Exit1: TMenuItem
+        Caption = 'Exit'
+        OnClick = ExitButton1Click
+      end
+    end
+    object Actions1: TMenuItem
+      Caption = 'Actions'
+      object Convert1: TMenuItem
+        Caption = 'Convert'
+        OnClick = ConvertButton1Click
+      end
+      object Convertnaive1: TMenuItem
+        Caption = 'Convert naive'
+        OnClick = ConvertNaiveButton1Click
+      end
+    end
+    object Help1: TMenuItem
+      Caption = 'Help'
+      object About1: TMenuItem
+        Caption = 'About'
+        OnClick = AboutButton1Click
+      end
+    end
   end
 end
