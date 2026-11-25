@@ -1670,9 +1670,11 @@ function ConvertNaive_Pass8(const sinp: string): string;
 var
   s, s2: TStringList;
   i, j: integer;
-  stmp, stmp2, stmp3, sident, sname: string;
+  stmp, stmp0, stmp1, stmp2, stmp3, stmp4, stmp5, stmp6, sident, sname: string;
   p1, p2, p3, len: integer;
   nspaces, nspaces2: integer;
+  scomment: string;
+  changed: boolean;
 begin
   s := TStringList.Create;
   s2 := TStringList.Create;
@@ -1691,6 +1693,12 @@ begin
         break;
     end;
     stmp := Trim(stmp);
+
+    if stmp = '' then
+    begin
+      s2.Add('');
+      Continue;
+    end;
 
     if i > 0 then
     begin
@@ -1714,6 +1722,8 @@ begin
     if odd(nspaces) then
       Dec(nspaces);
 
+    changed := False;
+
     if Pos('default:', stmp) = 1 then
     begin
       stmp[1] := ' ';
@@ -1725,6 +1735,8 @@ begin
       stmp[7] := 's';
       stmp[8] := 'e';
       stmp := Trim(stmp);
+
+      Changed := True;
     end;
 
     if Pos('case ', stmp) = 1 then
@@ -1771,11 +1783,85 @@ begin
             for j := p2 to Length(stmp) do
               stmp3 := stmp3 + stmp[j];
             stmp := stmp3;
+            Changed := True;
           end;
         end;
       end;
     end;
 
+    if not Changed then
+    begin
+      p1 := Pos(':=', stmp);
+      p2 := Pos('?', stmp);
+
+      stmp0 := stmp;
+      splitcomment(stmp, scomment);
+      stmp := Trim(stmp);
+
+      p3 := 0;
+      for j := Length(stmp) downto 1 do
+        if stmp[j] = ':' then
+        begin
+          p3 := j;
+          Break;
+        end;
+
+      if (p1 > 0) and (p2 > p1) and (p3 > p2) and (CountChr(stmp, ':') = 2) and
+        (CountChr(stmp, '?') = 1) and (CountChr(stmp, '=') = 1) and (CountChr(stmp, ';') = 1) and
+        (Pos(';', stmp) = Length(stmp)) then
+      begin
+        splitstring(stmp, stmp1, stmp5, ':');
+        if Length(stmp5) > 6 then
+          if stmp5[1] = '=' then
+          begin
+            Delete(stmp5, 1, 1);
+            splitstring(stmp5, stmp2, stmp6, '?');
+            splitstring(stmp6, stmp3, stmp4, ':');
+            stmp1 := Trim(stmp1);
+            stmp2 := Trim(stmp2);
+            stmp3 := Trim(stmp3);
+            stmp4 := Trim(stmp4);
+            if (stmp1 <> '') and (stmp2 <> '') and (stmp3 <> '') and (stmp4 <> '') then
+              if stmp4[Length(stmp4)] = ';' then
+              begin
+                SetLength(stmp4, Length(stmp4) - 1);
+                stmp4 := Trim(stmp4);
+                if issingleidentifier(stmp1) and isinsingleparenthesis(stmp2) and issingleidentifier(stmp3) and issingleidentifier(stmp4) then
+                begin
+                  stmp := '';
+                  for j := 1 to nspaces do
+                    stmp := stmp + ' ';
+                  stmp := stmp + 'if ' + stmp2 + ' then';
+                  if scomment <> '' then
+                    stmp := stmp + ' ' + scomment;
+                  s2.Add(stmp);
+
+                  stmp := '';
+                  for j := 1 to nspaces + 2 do
+                    stmp := stmp + ' ';
+                  stmp := stmp + stmp1 + ' := ' + stmp3;
+                  s2.Add(stmp);
+
+                  stmp := '';
+                  for j := 1 to nspaces do
+                    stmp := stmp + ' ';
+                  stmp := stmp + 'else';
+                  s2.Add(stmp);
+
+                  stmp := '';
+                  for j := 1 to nspaces + 2 do
+                    stmp := stmp + ' ';
+                  stmp := stmp + stmp1 + ' := ' + stmp4 + ';';
+                  s2.Add(stmp);
+                  
+                  Continue;
+                end;
+              end;
+          end;
+      end;
+
+      stmp := stmp0;
+    end;
 
     stmp := Trim(stmp);
     for j := 1 to nspaces do
