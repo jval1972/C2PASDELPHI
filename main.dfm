@@ -1831,11 +1831,10 @@ object Form1: TForm1
       OnClick = ConvertButton1Click
     end
     object ConvertNaiveButton1: TSpeedButton
-      Left = 552
+      Left = 560
       Top = 3
       Width = 145
       Height = 64
-      GroupIndex = 1
       Caption = 'Convert Naive'
       Flat = True
       Glyph.Data = {
