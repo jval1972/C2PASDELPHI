@@ -100,7 +100,9 @@ type
   end;
 
 function string2stringlist(const s: string; const c: char): TStringList;
-  
+
+procedure removeblanclines(const sl: TStringList);
+
 implementation
 
 uses
@@ -562,6 +564,15 @@ begin
   end;
   Result := TStringList.Create;
   Result.Text := tmp;
+end;
+
+procedure removeblanclines(const sl: TStringList);
+var
+  i: Integer;
+begin
+  for i := sl.Count - 1 downto 0 do
+    if Trim(sl.Strings[i]) = '' then
+      sl.Delete(i);
 end;
 
 end.

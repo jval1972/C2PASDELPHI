@@ -133,6 +133,22 @@ begin
     Result := s;
 end;
 
+function isPastypename(const s: string): boolean;
+var
+  s1: string;
+begin
+  s1 := LowerCase(s);
+  Result :=
+    (s1 = 'char') or
+    (s1 = 'byte') or
+    (s1 = 'longint') or
+    (s1 = 'integer') or
+    (s1 = 'boolean') or
+    (s1 = 'double') or
+    (s1 = 'single') or
+    (s1 = 'int64');
+end;
+
 function isidentifier(const stmp1: string): boolean;
 var
   i: integer;
@@ -231,6 +247,42 @@ begin
       if not (stmp[i] in ['a'..'z']) then
         if not (stmp[i] in ['1'..'9', '0', '_']) then
           Exit;
+
+  Result := True;
+end;
+
+function isstructintidentifier(const stmp1: string): boolean;
+var
+  i: integer;
+  stmp: string;
+begin
+  stmp := Trim(stmp1);
+  stmp := StringReplace(stmp, '->', '.', [rfReplaceAll, rfIgnoreCase]);
+
+  Result := False;
+  if stmp = '' then
+    Exit;
+
+  if stmp[1] = '$' then
+    Exit;
+
+  for i := 1 to length(stmp) do
+    if not (stmp[i] in ['A'..'Z']) then
+      if not (stmp[i] in ['a'..'z']) then
+        if not (stmp[i] in ['1'..'9', '0', '_', '.', '[', ']']) then
+          Exit;
+
+  if Pos('..', stmp) > 0 then
+    Exit;
+  if Pos('[]', stmp) > 0 then
+    Exit;
+  if CountChr(stmp, '[') <> CountChr(stmp, ']') then
+    Exit;
+  if Pos('[', stmp) > 0 then
+    if Pos(']', stmp) < Pos('[', stmp) then
+      Exit;
+  if Pos('.', stmp) = 1 then
+    Exit;
 
   Result := True;
 end;
@@ -1668,13 +1720,14 @@ end;
 
 function ConvertNaive_Pass8(const sinp: string): string;
 var
-  s, s2: TStringList;
-  i, j: integer;
+  s, s2, s3: TStringList;
+  i, j, idx: integer;
   stmp, stmp0, stmp1, stmp2, stmp3, stmp4, stmp5, stmp6, sident, sname: string;
   p1, p2, p3, len: integer;
   nspaces, nspaces2: integer;
   scomment: string;
   changed: boolean;
+  sfront: string;
 begin
   s := TStringList.Create;
   s2 := TStringList.Create;
@@ -1791,6 +1844,7 @@ begin
 
     if not Changed then
     begin
+      // Ternary operator
       p1 := Pos(':=', stmp);
       p2 := Pos('?', stmp);
 
@@ -1807,7 +1861,7 @@ begin
         end;
 
       if (p1 > 0) and (p2 > p1) and (p3 > p2) and (CountChr(stmp, ':') = 2) and
-        (CountChr(stmp, '?') = 1) and (CountChr(stmp, '=') = 1) and (CountChr(stmp, ';') = 1) and
+        (CountChr(stmp, '?') = 1) and (CountChr(stmp, '=') >= 1) and (CountChr(stmp, ';') = 1) and
         (Pos(';', stmp) = Length(stmp)) then
       begin
         splitstring(stmp, stmp1, stmp5, ':');
@@ -1826,36 +1880,88 @@ begin
               begin
                 SetLength(stmp4, Length(stmp4) - 1);
                 stmp4 := Trim(stmp4);
-                if issingleidentifier(stmp1) and isinsingleparenthesis(stmp2) and issingleidentifier(stmp3) and issingleidentifier(stmp4) then
+                stmp1 := StringReplace(stmp1, '   ', ' ', [rfReplaceAll, rfIgnoreCase]);
+                stmp1 := StringReplace(stmp1, '  ', ' ', [rfReplaceAll, rfIgnoreCase]);
+
+                s3 := string2stringlist(stmp1, ' ');
+                removeblanclines(s3);
+
+                sfront := '';
+
+                idx := s3.IndexOf('static');
+                if idx = 0 then
                 begin
-                  stmp := '';
-                  for j := 1 to nspaces do
-                    stmp := stmp + ' ';
-                  stmp := stmp + 'if ' + stmp2 + ' then';
-                  if scomment <> '' then
-                    stmp := stmp + ' ' + scomment;
-                  s2.Add(stmp);
-
-                  stmp := '';
-                  for j := 1 to nspaces + 2 do
-                    stmp := stmp + ' ';
-                  stmp := stmp + stmp1 + ' := ' + stmp3;
-                  s2.Add(stmp);
-
-                  stmp := '';
-                  for j := 1 to nspaces do
-                    stmp := stmp + ' ';
-                  stmp := stmp + 'else';
-                  s2.Add(stmp);
-
-                  stmp := '';
-                  for j := 1 to nspaces + 2 do
-                    stmp := stmp + ' ';
-                  stmp := stmp + stmp1 + ' := ' + stmp4 + ';';
-                  s2.Add(stmp);
-                  
-                  Continue;
+                  s3.Delete(0);
+                  sfront := sfront + ' static';
                 end;
+
+                idx := s3.IndexOf('const');
+                if idx = 0 then
+                begin
+                  s3.Delete(0);
+                  sfront := sfront + ' const';
+                end;
+
+                if s3.Count > 1 then
+                  if isCtypename(s3.Strings[0]) or isPastypename(s3.Strings[0]) or issingleidentifier(s3.Strings[0]) then
+                  begin
+                    sfront := sfront + ' ' + s3.Strings[0];
+                    s3.Delete(0);
+                  end;
+
+                if s3.Count = 1 then
+                  stmp1 := s3.Strings[0];
+
+                if (s3.Count = 1) and (isstructintidentifier(stmp1) or issingleidentifier(stmp1)) and
+                  (stmp2 <> '') and
+//                  isinsingleparenthesis(stmp2) and
+                  (stmp3 <> '') and
+                  (stmp4 <> '') then
+//                  (issingleidentifier(stmp3) or isintidentifier(stmp3)) and
+//                  (issingleidentifier(stmp4) or isintidentifier(stmp4)) then
+                begin
+                  stmp1 := Trim(sfront + ' ' + stmp1);
+
+                  stmp := '';
+                  for j := 1 to nspaces do
+                    stmp := stmp + ' ';
+                  if isinsingleparenthesis(stmp2) then
+                  begin
+                    Delete(stmp2, 1, 1);
+                    SetLength(stmp2, Length(stmp2) - 1);
+                    stmp2 := Trim(stmp2);
+                  end;
+
+                  if stmp2 <> '' then
+                  begin
+                    stmp := stmp + 'if ' + stmp2 + ' then';
+                    if scomment <> '' then
+                      stmp := stmp + ' ' + scomment;
+                    s2.Add(stmp);
+
+                    stmp := '';
+                    for j := 1 to nspaces + 2 do
+                      stmp := stmp + ' ';
+                    stmp := stmp + stmp1 + ' := ' + stmp3;
+                    s2.Add(stmp);
+
+                    stmp := '';
+                    for j := 1 to nspaces do
+                      stmp := stmp + ' ';
+                    stmp := stmp + 'else';
+                    s2.Add(stmp);
+
+                    stmp := '';
+                    for j := 1 to nspaces + 2 do
+                      stmp := stmp + ' ';
+                    stmp := stmp + stmp1 + ' := ' + stmp4 + ';';
+                    s2.Add(stmp);
+
+                    s3.Free;
+                    Continue;
+                  end;
+                end;
+                s3.Free;
               end;
           end;
       end;
