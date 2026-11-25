@@ -34,9 +34,9 @@ uses
 
 function c2pas_doReplace(const src: string; const _old, _new: string): string;
 begin
-  result := StringReplace(src, _old, _new, [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(src, _old, _new, [rfReplaceAll, rfIgnoreCase]);
 {  if Pos('', src) <> 0 then
-    result := result + ' ';}
+    Result := Result + ' ';}
 end;
 
 type
@@ -45,9 +45,9 @@ type
 
 function bufferlen(const b: buffer_p): integer;
 begin
-  result := 0;
-  while b[result] <> #0 do
-    Inc(result);
+  Result := 0;
+  while b[Result] <> #0 do
+    Inc(Result);
 end;
 
 const
@@ -176,7 +176,7 @@ begin
   if (index < 0) or (index >= fnumitems) then
     raise Exception.Create('FracManager.Get(): Invalid index');
 
-  result := '';
+  Result := '';
   if fitems[index]._type = FCT_NONE then
     exit;
     
@@ -204,7 +204,7 @@ end;
 
 function FracManager.GetT(Index: Integer): integer;
 begin
-  result := fitems[index]._type;
+  Result := fitems[index]._type;
 end;
 
 procedure FracManager.PutT(Index: Integer; const t: integer);
@@ -214,7 +214,7 @@ end;
 
 function FracManager.GetT2(Index: Integer): integer;
 begin
-  result := fitems[index]._type2;
+  Result := fitems[index]._type2;
 end;
 
 procedure FracManager.PutT2(Index: Integer; const t: integer);
@@ -329,12 +329,12 @@ const
 
 function whitespace(c: Char): Boolean;
 begin
-  result := Pos(c, whitespacestr) > 0;
+  Result := Pos(c, whitespacestr) > 0;
 end;
 
 function symbol(c: Char): Boolean;
 begin
-  result := Pos(c, symbolstr) > 0;
+  Result := Pos(c, symbolstr) > 0;
 end;
 
 function pascalkeyword(const s: string): boolean;
@@ -344,10 +344,10 @@ begin
   for i := Low(pascal_reserved_words) to High(pascal_reserved_words) do
     if s = pascal_reserved_words[i] then
     begin
-      result := true;
+      Result := true;
       exit;
     end;
-  result := false;
+  Result := false;
 end;
 
 function ansickeyword(const s: string): boolean;
@@ -357,10 +357,10 @@ begin
   for i := Low(ansi_c_reserved_words) to High(ansi_c_reserved_words) do
     if s = ansi_c_reserved_words[i] then
     begin
-      result := true;
+      Result := true;
       exit;
     end;
-  result := false;
+  Result := false;
 end;
 
 type
@@ -417,27 +417,27 @@ var
   i: integer;
   blocktyp: integer;
 begin
-  result._str := '';
-  result._type := a[start]._type;
-  result._type2 := 255;
+  Result._str := '';
+  Result._type := a[start]._type;
+  Result._type2 := 255;
   i := start;
   while true do
   begin
     if a[i]._type = FCT_NONE then
     begin
-      result._str := #0;
-      result._type := FCT_NONE;
-      result._type2 := FCT_NONE;
+      Result._str := #0;
+      Result._type := FCT_NONE;
+      Result._type2 := FCT_NONE;
       start := i;
       exit;
     end;
     while whitespace(a[i]._char) do
     begin
       a[i]._type := FCT_BLANC;
-      result._str := result._str + '#' + IntToStr(Ord(a[i]._char));
+      Result._str := Result._str + '#' + IntToStr(Ord(a[i]._char));
       Inc(i);
     end;
-    if result._str <> '' then
+    if Result._str <> '' then
     begin
       start := i;
       exit;
@@ -452,8 +452,8 @@ begin
         blocktyp := a[i]._type;
         while a[i]._type = blocktyp do
         begin
-          result._str := Result._str + a[i]._char;
-          result._type := blocktyp;
+          Result._str := Result._str + a[i]._char;
+          Result._type := blocktyp;
           Inc(i);
         end;
         start := i + 1;
@@ -464,7 +464,7 @@ begin
         if symbol(a[i]._char) then
         begin
           start := i + 1;
-          result._str := a[i]._char;
+          Result._str := a[i]._char;
           if a[i]._char = '+' then
           begin
             if a[i + 1]._char in ['+', '='] then
@@ -561,7 +561,7 @@ begin
         begin
           while not symbol(a[i]._char) and not whitespace(a[i]._char) do
           begin
-            result._str := result._str + a[i]._char;
+            Result._str := Result._str + a[i]._char;
             Inc(i);
           end;
           start := i;
@@ -579,7 +579,7 @@ var
   i: integer;
   blocktyp: integer;
 begin
-  result := '';
+  Result := '';
   i := start;
   while true do
   begin
@@ -591,10 +591,10 @@ begin
     while whitespace(a[i]._char) do
     begin
       a[i]._type := FCT_BLANC;
-      result := result + '#' + IntToStr(Ord(a[i]._char));
+      Result := Result + '#' + IntToStr(Ord(a[i]._char));
       Inc(i);
     end;
-    if result <> '' then
+    if Result <> '' then
     begin
       start := i;
       exit;
@@ -609,7 +609,7 @@ begin
         blocktyp := a[i]._type;
         while a[i]._type = blocktyp do
         begin
-          result := Result + a[i]._char;
+          Result := Result + a[i]._char;
           Inc(i);
         end;
         start := i + 1;
@@ -620,7 +620,7 @@ begin
         if symbol(a[i]._char) then
         begin
           start := i + 1;
-          result := a[i]._char;
+          Result := a[i]._char;
           if a[i]._char = '+' then
           begin
             if a[i + 1]._char in ['+', '='] then
@@ -717,7 +717,7 @@ begin
         begin
           while not symbol(a[i]._char) and not whitespace(a[i]._char) do
           begin
-            result := result + a[i]._char;
+            Result := Result + a[i]._char;
             Inc(i);
           end;
           start := i;
@@ -790,11 +790,11 @@ begin
     if a[x1]._char = c then
       Result := x1
     else
-      result := -1;
+      Result := -1;
     exit;
   end;
 
-  result := -1;
+  Result := -1;
 
   if x1 < x2 then
     dx := 1
@@ -962,17 +962,17 @@ var
 begin
   if _fuses.Count = 0 then
   begin
-    result := '';
+    Result := '';
     exit;
   end;
-  result := 'uses'#13#10;
+  Result := 'uses'#13#10;
   for i := 0 to _fuses.Count - 1 do
   begin
     Result := Result + '  ' + _fuses.Strings[i];
     if i = _fuses.Count - 1 then
-      result := result + ';'#13#10
+      Result := Result + ';'#13#10
     else
-      result := Result + ','#13#10;
+      Result := Result + ','#13#10;
   end;
   Result := Result + #13#10;
 end;
@@ -983,10 +983,10 @@ var
 begin
   if _fconsts.Count = 0 then
   begin
-    result := '';
+    Result := '';
     exit;
   end;
-  result := result + 'const'#13#10;
+  Result := Result + 'const'#13#10;
   for i := 0 to _fconsts.Count - 1 do
     Result := Result + _fconsts.Strings[i] + #13#10;
   Result := Result + #13#10;
@@ -998,11 +998,11 @@ var
 begin
   if _fprocs.Count = 0 then
   begin
-    result := '';
+    Result := '';
     exit;
   end;
   for i := 0 to _fprocs.Count - 1 do
-    result := result + _fprocs.Strings[i] + #13#10#13#10;
+    Result := Result + _fprocs.Strings[i] + #13#10#13#10;
   Result := Result + #13#10;
 end;
 
@@ -1012,10 +1012,10 @@ var
 begin
   if _ftypes.Count = 0 then
   begin
-    result := '';
+    Result := '';
     exit;
   end;
-  result := result + 'type'#13#10;
+  Result := Result + 'type'#13#10;
   for i := 0 to _ftypes.Count - 1 do
     Result := Result + _ftypes.Strings[i] + #13#10;
   Result := Result + #13#10;
@@ -1027,10 +1027,10 @@ var
 begin
   if _fvars.Count = 0 then
   begin
-    result := '';
+    Result := '';
     exit;
   end;
-  result := result + 'var'#13#10;
+  Result := Result + 'var'#13#10;
   for i := 0 to _fvars.Count - 1 do
     Result := Result + _fvars.Strings[i] + #13#10;
   Result := Result + #13#10;
@@ -1044,10 +1044,10 @@ begin
   for ii := x to fmanager.Count - 1 do
     if fmanager.Strings[ii] = sr then
     begin
-      result := ii;
+      Result := ii;
       exit;
     end;
-  result := -1;
+  Result := -1;
 end;
 
 procedure PascalConvertor.ReplaceTokens(const _from, _to: integer; const _old, _new: string);
@@ -1062,12 +1062,12 @@ end;
 // Next not blanc token
 function PascalConvertor.nexttoken(const x: Integer): integer;
 begin
-  result := x + 1;
+  Result := x + 1;
   while fmanager.Types[Result] <> FCT_SOURCE do
   begin
     if fmanager.Types[Result] = FCT_NONE then
     begin
-      result := -1;
+      Result := -1;
       exit;
     end;
     Inc(Result);
@@ -1078,12 +1078,12 @@ function PascalConvertor.tokenrange(const _from, _to: integer): string;
 var
   i: integer;
 begin
-  result := '';
+  Result := '';
   for i := _from to _to do
     if fmanager.Types[i] = FCT_BLANC then
-      result := result + _blanks(fmanager.Strings[i])
+      Result := Result + _blanks(fmanager.Strings[i])
     else
-      result := result + fmanager.Strings[i];
+      Result := Result + fmanager.Strings[i];
 end;
 
 function PascalConvertor.CheckConst(var pos: integer): string;
@@ -1097,7 +1097,7 @@ var
   i: integer;
   x: integer;
 begin
-  result := '';
+  Result := '';
   if fmanager.Types[pos] <> FCT_SOURCE then
     exit;
 
@@ -1177,13 +1177,13 @@ begin
       ReplaceTokens(p_equal + 1, p_stop, '{', '(');
       ReplaceTokens(p_equal + 1, p_stop, '}', ')');
 
-      result := #13#10'const'#13#10 +
+      Result := #13#10'const'#13#10 +
                 '  ' + fmanager.Strings[i_var] + ': array';
 
       for x := 0 to n.Count - 1 do
-        result := result + '[0..' + n.Strings[x] + ']';
+        Result := Result + '[0..' + n.Strings[x] + ']';
 
-      result := result + ' of ' +
+      Result := Result + ' of ' +
                 fmanager.Strings[i_type] + ' == ' +
                 tokenrange(p_equal + 1, p_stop);
       pos := p_stop;
@@ -1381,7 +1381,7 @@ begin
         end
         else
         begin
-          result := result + '{$DEFINE ' + s1 + '}';
+          Result := Result + '{$DEFINE ' + s1 + '}';
           dowhitespace := true;
         end;
       end
@@ -1390,7 +1390,7 @@ begin
         _str := Trim(RightStr(_str, Length(_str) - 6));
         s1 := Trim(firstword(_str));
         s2 := Trim(secondword(_str));
-        result := result + '{$IFDEF ' + s1 + '} ' + s2 + #13#10;
+        Result := Result + '{$IFDEF ' + s1 + '} ' + s2 + #13#10;
         dowhitespace := true;
       end
       else if Pos('#ifndef ', _str) = 1 then
@@ -1398,13 +1398,13 @@ begin
         _str := Trim(RightStr(_str, Length(_str) - 7));
         s1 := Trim(firstword(_str));
         s2 := Trim(secondword(_str));
-        result := result + '{$IFNDEF ' + s1 + '} ' + s2 + #13#10;
+        Result := Result + '{$IFNDEF ' + s1 + '} ' + s2 + #13#10;
         dowhitespace := true;
       end
       else if Pos('#endif ', _str) = 1 then
       begin
         _str := Trim(RightStr(_str, Length(_str) - 6));
-        result := result + '{$ENDIF} ' + _str + #13#10;
+        Result := Result + '{$ENDIF} ' + _str + #13#10;
         dowhitespace := true;
       end;
       Inc(i);
@@ -1416,7 +1416,7 @@ begin
     else if (fmanager.Types[i] = FCT_SOURCE) and (fmanager.Strings[i] = 'Object') then
     begin
       fmanager.Strings[i] := 'obj_t';
-      result := result + 'obj_t';
+      Result := Result + 'obj_t';
     end
     else
     begin
@@ -1438,19 +1438,20 @@ begin
             'implementation'#13#10#13#10 +
             Result +
             #13#10#13#10'end.';
+
 end;
 
 function PascalConvertor.FinalPass: string;
 var
   i: integer;
 begin
-  result := '';
+  Result := '';
   for i := 0 to fmanager.Count - 1 do
   begin
     if fmanager.Types[i] = FCT_SOURCE then
       if fmanager.Strings[i] = 'Object' then
         fmanager.Strings[i] := 'obj_t';
-    result := Result + fmanager.Strings[i];
+    Result := Result + fmanager.Strings[i];
   end;
 end;
 
@@ -1469,19 +1470,19 @@ var
 begin
   if lines = nil then
   begin
-    result := '';
+    Result := '';
     Exit;
   end;
 
   if lines.Count = 0 then
   begin
-    result := '';
+    Result := '';
     Exit;
   end;
 
   if Trim(lines.Text) = '' then
   begin
-    result := '';
+    Result := '';
     Exit;
   end;
 
@@ -1498,10 +1499,10 @@ begin
   src := l.Text;
 
   l.Free;
-  
+
   src := c2pas_doReplace(src, #13#10, #10);
 
-  result := '';
+  Result := '';
 
   s1 := src;
   s2 := '';
@@ -1638,7 +1639,6 @@ begin
   manager.Free;
 end;
 
-
 function c2pas_parse1(const lines: TStrings): string;
 var
   i, j: integer;
@@ -1655,19 +1655,19 @@ var
 begin
   if lines = nil then
   begin
-    result := '';
+    Result := '';
     Exit;
   end;
 
   if lines.Count = 0 then
   begin
-    result := '';
+    Result := '';
     Exit;
   end;
 
   if Trim(lines.Text) = '' then
   begin
-    result := '';
+    Result := '';
     Exit;
   end;
 
@@ -1682,7 +1682,7 @@ begin
 
   l.Free;
 
-  result := '';
+  Result := '';
 
   s1 := src;
   s2 := '';
@@ -1846,7 +1846,7 @@ begin
         stmp := c2pas_doReplace(stmp, ' & ', ' and ');
         stmp := c2pas_doReplace(stmp, ' | ', ' or ');
         stmp := c2pas_doReplace(stmp, '!', ' not ');
-        stmp := c2pas_doReplace(stmp, ' return;', ' exit;');
+        stmp := c2pas_doReplace(stmp, ' return;', ' Exit;');
         stmp := c2pas_doReplace(stmp, ' NULL ', ' nil ');
         stmp := c2pas_doReplace(stmp, ' NULL;', ' nil;');
         stmp := c2pas_doReplace(stmp, ' NULL)', ' nil)');
@@ -1854,6 +1854,8 @@ begin
         stmp := c2pas_doReplace(stmp, '(NULL,', '(nil,');
         stmp := c2pas_doReplace(stmp, '(NULL)', '(nil)');
         stmp := c2pas_doReplace(stmp, #10'void ', #10'procedure ');
+        stmp := c2pas_doReplace(stmp, #10'static void ', #10'procedure ');
+        stmp := c2pas_doReplace(stmp, #10'static  void ', #10'procedure ');
         stmp := c2pas_doReplace(stmp, #10'procedure *', #10'void *');
         stmp := c2pas_doReplace(stmp, #10'static void ', #10'procedure ');
         stmp := c2pas_doReplace(stmp, #10'procedure *', #10'static void *');
@@ -1871,12 +1873,12 @@ begin
         stmp := c2pas_doReplace(stmp, ' then  ', ' then ');
         stmp := c2pas_convert_for(stmp);
         stmp := c2pas_doReplace(stmp, ' ? true : false;'#13#10, ' <> 0;'#13#10);
-        stmp := c2pas_doReplace(stmp, #13#10' return true;'#13#10'end'#13#10#13#10, #13#10' result := true;'#13#10'end;'#13#10#13#10);
-        stmp := c2pas_doReplace(stmp, #13#10' return false;'#13#10'end'#13#10#13#10, #13#10' result := false;'#13#10'end;'#13#10#13#10);
-        stmp := c2pas_doReplace(stmp, #13#10'  return true;'#13#10'end'#13#10#13#10, #13#10'  result := true;'#13#10'end;'#13#10#13#10);
-        stmp := c2pas_doReplace(stmp, #13#10'  return false;'#13#10'end'#13#10#13#10, #13#10'  result := false;'#13#10'end;'#13#10#13#10);
-        stmp := c2pas_doReplace(stmp, #13#10'  return true;'#13#10'end;'#13#10#13#10, #13#10'  result := true;'#13#10'end;'#13#10#13#10);
-        stmp := c2pas_doReplace(stmp, #13#10'  return false;'#13#10'end;'#13#10#13#10, #13#10'  result := false;'#13#10'end;'#13#10#13#10);
+        stmp := c2pas_doReplace(stmp, #13#10' return true;'#13#10'end'#13#10#13#10, #13#10' Result := true;'#13#10'end;'#13#10#13#10);
+        stmp := c2pas_doReplace(stmp, #13#10' return false;'#13#10'end'#13#10#13#10, #13#10' Result := false;'#13#10'end;'#13#10#13#10);
+        stmp := c2pas_doReplace(stmp, #13#10'  return true;'#13#10'end'#13#10#13#10, #13#10'  Result := true;'#13#10'end;'#13#10#13#10);
+        stmp := c2pas_doReplace(stmp, #13#10'  return false;'#13#10'end'#13#10#13#10, #13#10'  Result := false;'#13#10'end;'#13#10#13#10);
+        stmp := c2pas_doReplace(stmp, #13#10'  return true;'#13#10'end;'#13#10#13#10, #13#10'  Result := true;'#13#10'end;'#13#10#13#10);
+        stmp := c2pas_doReplace(stmp, #13#10'  return false;'#13#10'end;'#13#10#13#10, #13#10'  Result := false;'#13#10'end;'#13#10#13#10);
         stmp := c2pas_doReplace(stmp, '(void)'#13#10, ';'#13#10);
         stmp := c2pas_doReplace(stmp, #13#10'  end else if ', #13#10'  end'#13#10'  else if ');
         stmp := c2pas_doReplace(stmp, #13#10'    end else if ', #13#10'    end'#13#10'    else if ');
@@ -1897,8 +1899,8 @@ begin
         stmp := c2pas_convert_switch(stmp);
         stmp := c2pas_doReplace(stmp, ' switch(', ' case ');
 
-        stmp := c2pas_doReplace(stmp, #13#10'  return true;'#13#10'}'#13#10#13#10, #13#10'  result := true;'#13#10'end;'#13#10#13#10);
-        stmp := c2pas_doReplace(stmp, #13#10'  return false;'#13#10'}'#13#10#13#10, #13#10'  result := false;'#13#10'end;'#13#10#13#10);
+        stmp := c2pas_doReplace(stmp, #13#10'  return true;'#13#10'}'#13#10#13#10, #13#10'  Result := true;'#13#10'end;'#13#10#13#10);
+        stmp := c2pas_doReplace(stmp, #13#10'  return false;'#13#10'}'#13#10#13#10, #13#10'  Result := false;'#13#10'end;'#13#10#13#10);
         stmp := c2pas_doReplace(stmp, ';'#13#10'}'#13#10#13#10, ';'#13#10'end;'#13#10#13#10);
         stmp := c2pas_doReplace(stmp, ';'#13#10'}'#13#10#13#10, ';'#13#10'end;'#13#10#13#10);
         stmp := c2pas_doReplace(stmp, 'end '#13#10'}'#13#10#13#10, 'end;'#13#10'end;'#13#10#13#10);
@@ -1906,6 +1908,38 @@ begin
         stmp := c2pas_doReplace(stmp, #13#10'}'#13#10#13#10, #13#10'end;'#13#10#13#10);
         stmp := c2pas_doReplace(stmp, #13#10'} '#13#10#13#10, #13#10'end;'#13#10#13#10);
         stmp := c2pas_doReplace(stmp, '(void)'#13#10, ';'#13#10);
+
+        ////////////////////////////////////////////////////
+        stmp := c2pas_doReplace(stmp, #9, '  ');
+        stmp := c2pas_doReplace(stmp, '( )', '()');
+        stmp := c2pas_doReplace(stmp, '  if   ', '  if ');
+        stmp := c2pas_doReplace(stmp, '  if   ', '  if ');
+        stmp := c2pas_doReplace(stmp, ' if  ', ' if ');
+        stmp := c2pas_doReplace(stmp, ' then  ', ' then ');
+        stmp := c2pas_doReplace(stmp, '  :=  ', ' := ');
+        stmp := c2pas_doReplace(stmp, '  =  ', ' = ');
+        stmp := c2pas_doReplace(stmp, '  +  ', ' + ');
+        stmp := c2pas_doReplace(stmp, '  -  ', ' - ');
+        stmp := c2pas_doReplace(stmp, '  *  ', ' * ');
+        stmp := c2pas_doReplace(stmp, '  /  ', ' / ');
+        stmp := c2pas_doReplace(stmp, '  >  ', ' > ');
+        stmp := c2pas_doReplace(stmp, '  >=  ', ' >= ');
+        stmp := c2pas_doReplace(stmp, '  <  ', ' < ');
+        stmp := c2pas_doReplace(stmp, '  <=  ', ' <= ');
+        stmp := c2pas_doReplace(stmp, '  <>  ', ' <> ');
+        stmp := c2pas_doReplace(stmp, ' ^. ', '^.');
+        stmp := c2pas_doReplace(stmp, ' . ', '.');
+        stmp := c2pas_doReplace(stmp, ' . ', '.');
+        stmp := c2pas_doReplace(stmp, ' return;', ' Exit;');
+        stmp := c2pas_doReplace(stmp, '  and  ', ' and ');
+        stmp := c2pas_doReplace(stmp, '  or  ', ' or ');
+        stmp := c2pas_doReplace(stmp, '  shr  ', ' shr ');
+        stmp := c2pas_doReplace(stmp, ' [', '[');
+        stmp := c2pas_doReplace(stmp, '[ ', '[');
+        stmp := c2pas_doReplace(stmp, ' ]', ']');
+        stmp := c2pas_doReplace(stmp, '] ', ']');
+        stmp := c2pas_doReplace(stmp, ',  ', ', ');
+        stmp := c2pas_doReplace(stmp, 'procedure  ', 'procedure ');
 
         manager.strings[i] := stmp;
       except
@@ -1951,9 +1985,9 @@ begin
           stmp := stmp + ';';
       end;}
 
-  result := '';
+  Result := '';
   for i := 0 to manager.Count - 1 do
-    result := result + manager.strings[i];
+    Result := Result + manager.strings[i];
   manager.Free;
 
 end;
@@ -1972,19 +2006,19 @@ var
 begin
   if lines = nil then
   begin
-    result := '';
+    Result := '';
     Exit;
   end;
 
   if lines.Count = 0 then
   begin
-    result := '';
+    Result := '';
     Exit;
   end;
 
   if Trim(lines.Text) = '' then
   begin
-    result := '';
+    Result := '';
     Exit;
   end;
 
@@ -1994,7 +2028,7 @@ begin
   src := lines.Text;
 //  src := c2pas_doReplace(src, #13#10, #10);
 
-  result := '';
+  Result := '';
 
   s1 := src;
   s2 := '';
@@ -2218,11 +2252,11 @@ var
     if (Pos(' if ', s1) = 0) and (Pos(#10'if ', s1) = 0) and
        (Pos(' if(', s1) = 0) and (Pos(#10'if(', s1) = 0) then
     begin
-      result := false;
+      Result := false;
       Exit;
     end;
 
-    result := true;
+    Result := true;
     parse_if(Pos(' if ', s1));
     parse_if(Pos(#10'if ', s1));
     parse_if(Pos(' if(', s1));
@@ -2235,7 +2269,7 @@ begin
   s1 := StringReplace(s1, ' IF ', ' if ', [rfReplaceAll]);
   s1 := StringReplace(s1, #10'IF ', #10'if ', [rfReplaceAll]);
   s1 := StringReplace(s1, ' IF(', ' if(', [rfReplaceAll]);
-  result := StringReplace(s1, #10'IF(', #10'if(', [rfReplaceAll]);
+  Result := StringReplace(s1, #10'IF(', #10'if(', [rfReplaceAll]);
 end;
 
 function c2pas_convert_if2(const src: string): string;
@@ -2252,14 +2286,14 @@ var
 begin
   if Length(src) < 8 then
   begin
-    result := src;
+    Result := src;
     exit;
   end;
   lastln := (src[Length(src) - 1] = #13) and (src[Length(src)] = #10);
 
   s := TStringList.Create;
   s.Text := src;
-  result := '';
+  Result := '';
   for i := 0 to s.Count - 1 do
   begin
     stmp := s.Strings[i];
@@ -2275,7 +2309,7 @@ begin
     if_pos2 := Pos(' if (', stmp);
     if (if_pos1 = 0) and (if_pos2 = 0) then
     begin
-      result := result + stmp + #13#10;
+      Result := Result + stmp + #13#10;
       Continue;
     end;
 
@@ -2283,7 +2317,7 @@ begin
     then_pos2 := Pos(') then ', stmp);
     if (then_pos1 = 0) and (then_pos2 = 0) then
     begin
-      result := result + stmp + #13#10;
+      Result := Result + stmp + #13#10;
       Continue;
     end;
 
@@ -2328,7 +2362,7 @@ begin
       stmp := StringReplace(stmp, ' then  return true;',
          ' then'#13#10 +
          s_spaces(LeadingSpaces(stmp)) + 'begin'#13#10 +
-         s_spaces(LeadingSpaces(stmp) + 2) + 'result := true;'#13#10 +
+         s_spaces(LeadingSpaces(stmp) + 2) + 'Result := true;'#13#10 +
          s_spaces(LeadingSpaces(stmp) + 2) + 'exit;'#13#10 +
          s_spaces(LeadingSpaces(stmp)) + 'end;'#13#10, []);
 
@@ -2337,7 +2371,7 @@ begin
       stmp := StringReplace(stmp, ' then return true;',
          ' then'#13#10 +
          s_spaces(LeadingSpaces(stmp)) + 'begin'#13#10 +
-         s_spaces(LeadingSpaces(stmp) + 2) + 'result := true;'#13#10 +
+         s_spaces(LeadingSpaces(stmp) + 2) + 'Result := true;'#13#10 +
          s_spaces(LeadingSpaces(stmp) + 2) + 'exit;'#13#10 +
          s_spaces(LeadingSpaces(stmp)) + 'end;'#13#10, []);
 
@@ -2346,7 +2380,7 @@ begin
       stmp := StringReplace(stmp, ' then  return false;',
          ' then'#13#10 +
          s_spaces(LeadingSpaces(stmp)) + 'begin'#13#10 +
-         s_spaces(LeadingSpaces(stmp) + 2) + 'result := false;'#13#10 +
+         s_spaces(LeadingSpaces(stmp) + 2) + 'Result := false;'#13#10 +
          s_spaces(LeadingSpaces(stmp) + 2) + 'exit;'#13#10 +
          s_spaces(LeadingSpaces(stmp)) + 'end;'#13#10, []);
 
@@ -2355,7 +2389,7 @@ begin
       stmp := StringReplace(stmp, ' then return false;',
          ' then'#13#10 +
          s_spaces(LeadingSpaces(stmp)) + 'begin'#13#10 +
-         s_spaces(LeadingSpaces(stmp) + 2) + 'result := false;'#13#10 +
+         s_spaces(LeadingSpaces(stmp) + 2) + 'Result := false;'#13#10 +
          s_spaces(LeadingSpaces(stmp) + 2) + 'exit;'#13#10 +
          s_spaces(LeadingSpaces(stmp)) + 'end;'#13#10, []);
 
@@ -2366,12 +2400,12 @@ begin
          s_spaces(LeadingSpaces(stmp) + 2) + 'exit;'#13#10#13#10, []);
 
     stmp := StringReplace(stmp, ' then  ', ' then ', []);
-      result := result + stmp + #13#10;
+      Result := Result + stmp + #13#10;
   end;
   s.Free;
 
   if not lastln then
-    removetrailingNL(result);
+    removetrailingNL(Result);
 end;
 
 function c2pas_convert_for(const src: string): string;
@@ -2396,7 +2430,7 @@ var
 begin
   if Length(src) < 8 then
   begin
-    result := src;
+    Result := src;
     exit;
   end;
   lastln := (src[Length(src) - 1] = #13) and (src[Length(src)] = #10);
@@ -2612,7 +2646,7 @@ begin
   s.Free;
 
   if not lastln then
-    removetrailingNL(result);
+    removetrailingNL(Result);
 end;
 
 function c2pas_convert_switch(const src: string): string;
@@ -2626,14 +2660,14 @@ var
 begin
   if Length(src) < 8 then
   begin
-    result := src;
+    Result := src;
     exit;
   end;
   lastln := (src[Length(src) - 1] = #13) and (src[Length(src)] = #10);
 
   s := TStringList.Create;
   s.Text := src;
-  result := '';
+  Result := '';
   for i := 0 to s.Count - 1 do
   begin
     stmp := s.Strings[i];
@@ -2656,7 +2690,7 @@ begin
   s.Free;
 
   if not lastln then
-    removetrailingNL(result);
+    removetrailingNL(Result);
 end;
 
 
@@ -2671,14 +2705,14 @@ var
 begin
   if Length(src) < 8 then
   begin
-    result := src;
+    Result := src;
     exit;
   end;
   lastln := (src[Length(src) - 1] = #13) and (src[Length(src)] = #10);
 
   s := TStringList.Create;
   s.Text := src;
-  result := '';
+  Result := '';
   for i := 0 to s.Count - 1 do
   begin
     stmp := s.Strings[i];
@@ -2686,7 +2720,7 @@ begin
     stmp := Trim(stmp);
     if stmp = '' then
     begin
-      result := result + #13#10;
+      Result := Result + #13#10;
       Continue;
     end;
 
@@ -2700,7 +2734,7 @@ begin
           for j := p + 6 to Length(stmp) do
             rest := rest + stmp[j];
           stmp := Trim(LeftStr(stmp, p + 5));
-          result := Result + s_spaces(lspaces) + stmp + #13#10 + s_spaces(lspaces + 2) + rest + #13#10;
+          Result := Result + s_spaces(lspaces) + stmp + #13#10 + s_spaces(lspaces + 2) + rest + #13#10;
           Continue;
         end;
       end;
@@ -2711,7 +2745,7 @@ begin
   s.Free;
 
   if not lastln then
-    removetrailingNL(result);
+    removetrailingNL(Result);
 end;
 
 
@@ -2727,14 +2761,14 @@ var
 begin
   if Length(src) < 8 then
   begin
-    result := src;
+    Result := src;
     exit;
   end;
   lastln := (src[Length(src) - 1] = #13) and (src[Length(src)] = #10);
 
   s := TStringList.Create;
   s.Text := src;
-  result := '';
+  Result := '';
   for i := 0 to s.Count - 1 do
   begin
     stmp := s.Strings[i];
@@ -2742,7 +2776,7 @@ begin
     stmp := Trim(stmp);
     if stmp = '' then
     begin
-      result := result + #13#10;
+      Result := Result + #13#10;
       Continue;
     end;
 
@@ -2757,7 +2791,7 @@ begin
         if ll.Strings[1] = '(true)' then
           if ll.Strings[2] = 'begin' then
           begin
-            result := Result + s_spaces(lspaces) + 'while true do'#13#10 + s_spaces(lspaces) + 'begin'#13#10;
+            Result := Result + s_spaces(lspaces) + 'while true do'#13#10 + s_spaces(lspaces) + 'begin'#13#10;
             ll.Free;
             Continue;
           end;
@@ -2777,7 +2811,7 @@ begin
               s2 := Trim(s2);
               if IsIdentifier(s2) then
               begin
-                result := Result + s_spaces(lspaces) + 'while ' + s2 + ' do'#13#10 + s_spaces(lspaces) + 'begin'#13#10;
+                Result := Result + s_spaces(lspaces) + 'while ' + s2 + ' do'#13#10 + s_spaces(lspaces) + 'begin'#13#10;
                 ll.Free;
                 Continue;
               end;
@@ -2792,7 +2826,7 @@ begin
   s.Free;
 
   if not lastln then
-    removetrailingNL(result);
+    removetrailingNL(Result);
 end;
 
 function c2pas_convert_assignments(const src: string): string;
@@ -2834,7 +2868,7 @@ var
         if IsIdentifier(ss2) or IsNumber(ss2) or IsInteger(ss2) then
         begin
           _as_ret := ll.Strings[0] + ' := ' + ll.Strings[0] + ' ' + asgn + ' ' + ss2 + ';';
-          result := True;
+          Result := True;
           exit;
         end;
       end;
@@ -2862,7 +2896,7 @@ var
                     _as_ret := ll.Strings[0] + ' := ' + ll.Strings[0] + ' ' + asgn + ' (' + expr + ');'
                   else
                     _as_ret := ll.Strings[0] + ' := ' + ll.Strings[0] + ' ' + asgn + ' ' + expr + ';';
-                  result := True;
+                  Result := True;
                   exit;
                 end;
     end;
@@ -2900,20 +2934,20 @@ var
       exit;
 
     _as_ret := func + '(' + ss2 + ');';
-     result := True;
+     Result := True;
   end;
 
 begin
   if Length(src) < 8 then
   begin
-    result := src;
+    Result := src;
     exit;
   end;
   lastln := (src[Length(src) - 1] = #13) and (src[Length(src)] = #10);
 
   s := TStringList.Create;
   s.Text := src;
-  result := '';
+  Result := '';
   for i := 0 to s.Count - 1 do
   begin
     stmp := s.Strings[i];
@@ -2921,7 +2955,7 @@ begin
     stmp := Trim(stmp);
     if stmp = '' then
     begin
-      result := result + #13#10;
+      Result := Result + #13#10;
       Continue;
     end;
 
@@ -2960,7 +2994,7 @@ begin
   s.Free;
 
   if not lastln then
-    removetrailingNL(result);
+    removetrailingNL(Result);
 end;
 
 (*
@@ -2978,14 +3012,14 @@ var
 begin
   if Length(src) < 8 then
   begin
-    result := src;
+    Result := src;
     exit;
   end;
   lastln := (src[Length(src) - 1] = #13) and (src[Length(src)] = #10);
 
   s := TStringList.Create;
   s.Text := src;
-  result := '';
+  Result := '';
   for i := 0 to s.Count - 1 do
   begin
     stmp := s.Strings[i];
@@ -3003,8 +3037,8 @@ begin
 
   if not lastln then
   begin
-    if (result[Length(result) - 1] = #13) and (result[Length(result)] = #10) then
-      SetLength(result, Length(Result) - 2);
+    if (Result[Length(Result) - 1] = #13) and (Result[Length(Result)] = #10) then
+      SetLength(Result, Length(Result) - 2);
   end;
 
 
