@@ -1666,6 +1666,129 @@ begin
   s2.Free;
 end;
 
+function ConvertNaive_Pass8(const sinp: string): string;
+var
+  s, s2: TStringList;
+  i, j: integer;
+  stmp, stmp2, stmp3, sident, sname: string;
+  p1, p2, p3, len: integer;
+  nspaces, nspaces2: integer;
+begin
+  s := TStringList.Create;
+  s2 := TStringList.Create;
+
+  s.Text := sinp;
+
+  for i := 0 to s.Count - 1 do
+  begin
+    stmp := s.Strings[i];
+    nspaces := 0;
+    for j := 1 to length(stmp) do
+    begin
+      if stmp[j] = ' ' then
+        inc(nspaces)
+      else
+        break;
+    end;
+    stmp := Trim(stmp);
+
+    if i > 0 then
+    begin
+      stmp2 := s.Strings[i - 1];
+      nspaces2 := 0;
+      for j := 1 to length(stmp2) do
+      begin
+        if stmp2[j] = ' ' then
+          inc(nspaces2)
+        else
+          break;
+      end;
+      stmp2 := Trim(stmp2);
+    end
+    else
+    begin
+      nspaces2 := 0;
+      stmp2 := '';
+    end;
+
+    if odd(nspaces) then
+      Dec(nspaces);
+
+    if Pos('default:', stmp) = 1 then
+    begin
+      stmp[1] := ' ';
+      stmp[2] := ' ';
+      stmp[3] := ' ';
+      stmp[4] := ' ';
+      stmp[5] := 'e';
+      stmp[6] := 'l';
+      stmp[7] := 's';
+      stmp[8] := 'e';
+      stmp := Trim(stmp);
+    end;
+
+    if Pos('case ', stmp) = 1 then
+    begin
+      len := Length(stmp);
+      if (stmp[len - 3] = ' ') and (stmp[len - 2] = ' ') and (stmp[len - 1] = 'o') and (stmp[len] = 'f') then
+      begin
+        stmp[len - 2] := 'o';
+        stmp[len - 1] := 'f';
+        SetLength(stmp, len - 1);
+      end;
+    end;
+
+    if Pos('case ', stmp2) = 1 then
+    begin
+      len := Length(stmp2);
+      if (stmp2[len - 2] = ' ') and (stmp2[len - 1] = 'o') and (stmp2[len] = 'f') then
+        if stmp = 'begin' then
+          Continue;
+    end;
+
+    if (CountChr(stmp, '(') = 1) and  (CountChr(stmp, ')') = 1) then
+    begin
+      p1 := Pos('(', stmp);
+      p2 := Pos(')', stmp);
+      if p1 < p2 then
+      begin
+        stmp3 := '';
+        for j := p1 + 1 to p2 - 1 do
+          stmp3 := stmp3 + stmp[j];
+
+        stmp3 := StringReplace(stmp3, '   ', ' ', [rfReplaceAll, rfIgnoreCase]);
+        stmp3 := StringReplace(stmp3, '  ', ' ', [rfReplaceAll, rfIgnoreCase]);
+
+        if CountChr(stmp3, ' ') = 1 then
+        begin
+          splitstring(stmp3, sident, sname);
+          if isCtypename(sident) and issingleidentifier(sname) then
+          begin
+            stmp3 := '';
+            for j := 1 to p1 do
+              stmp3 := stmp3 + stmp[j];
+            stmp3 := stmp3 + sname + ': ' + C2Pastype(sident);
+            for j := p2 to Length(stmp) do
+              stmp3 := stmp3 + stmp[j];
+            stmp := stmp3;
+          end;
+        end;
+      end;
+    end;
+
+
+    stmp := Trim(stmp);
+    for j := 1 to nspaces do
+      stmp := ' ' + stmp;
+
+    s2.Add(stmp);
+  end;
+
+  Result := s2.Text;
+  s.Free;
+  s2.Free;
+end;
+
 function ConvertNaive(const sinp: string): string;
 begin
   Result := ConvertNaive_Pass1(sinp);
@@ -1675,6 +1798,7 @@ begin
   Result := ConvertNaive_Pass5(Result);
   Result := ConvertNaive_Pass6(Result);
   Result := ConvertNaive_Pass7(Result);
+  Result := ConvertNaive_Pass8(Result);
 end;
 
 
