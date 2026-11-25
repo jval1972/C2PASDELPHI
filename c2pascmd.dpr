@@ -18,29 +18,29 @@ var
   i: integer;
   l: integer;
 begin
-  result := ffilename;
-  if result <> '' then
+  Result := ffilename;
+  if Result <> '' then
   begin
-    l := Length(result);
+    l := Length(Result);
     if l > 4 then
-      if (not (result[l] in ['s', 'S'])) or
-         (not (result[l - 1] in ['a', 'A'])) or
-         (not (result[l - 2] in ['p', 'P'])) or
-         (not (result[l - 3] in ['.'])) then
+      if (not (Result[l] in ['s', 'S'])) or
+         (not (Result[l - 1] in ['a', 'A'])) or
+         (not (Result[l - 2] in ['p', 'P'])) or
+         (not (Result[l - 3] in ['.'])) then
       begin
         for i := l downto 1 do
-          if result[i] = '.' then
+          if Result[i] = '.' then
           begin
-            result[i] := '_';
+            Result[i] := '_';
             break;
           end
-          else if result[i] in ['/', '\'] then
+          else if Result[i] in ['/', '\'] then
             break;
-        result := result + '.pas';
+        Result := Result + '.pas';
       end;
   end;
-  if result = ffilename then
-    Result := result + '.pas';
+  if Result = ffilename then
+    Result := Result + '.pas';
 end;
 
 procedure make_pas_source(const inp: string);
