@@ -362,8 +362,10 @@ begin
   Result := StringReplace(Result, '->', '.', [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, ' case ', ' ', [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, ' switch ', ' case ', [rfReplaceAll, rfIgnoreCase]);
-  Result := StringReplace(Result, '{', ' begin ', [rfReplaceAll, rfIgnoreCase]);
-  Result := StringReplace(Result, '}', ' end;', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '{'#13#10, ' begin'#13#10, [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '{', ' begin'#13#10, [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '}'#13#10, ' end;'#13#10, [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '}', ' end;'#13#10, [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, '"', '''', [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, '/*', '(*', [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, '*/', '*)', [rfReplaceAll, rfIgnoreCase]);
@@ -1748,6 +1750,12 @@ begin
     stmp := Trim(stmp);
 
     if stmp = '' then
+    begin
+      s2.Add('');
+      Continue;
+    end;
+
+    if stmp = ';' then
     begin
       s2.Add('');
       Continue;
