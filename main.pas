@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, ComCtrls, ExtCtrls, Buttons, StdCtrls;
+  Dialogs, ComCtrls, ExtCtrls, Buttons, StdCtrls, Menus;
 
 type
   TForm1 = class(TForm)
@@ -24,6 +24,20 @@ type
     ConvertNaiveButton1: TSpeedButton;
     Panel2: TPanel;
     Bevel1: TBevel;
+    MainMenu1: TMainMenu;
+    File1: TMenuItem;
+    New1: TMenuItem;
+    N1: TMenuItem;
+    Open1: TMenuItem;
+    Save1: TMenuItem;
+    SaveAs1: TMenuItem;
+    Exit1: TMenuItem;
+    N2: TMenuItem;
+    Actions1: TMenuItem;
+    Convert1: TMenuItem;
+    Convertnaive1: TMenuItem;
+    Help1: TMenuItem;
+    About1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure NewButton1Click(Sender: TObject);

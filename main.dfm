@@ -1971,9 +1971,7 @@ object Form1: TForm1
   end
   object SaveDialog1: TSaveDialog
     DefaultExt = 'pas'
-    Filter = 
-      'Pascal source files (*.C source files (*.c; *.cpp; *.h)|*.c;*.cp' +
-      'p;*.h|All files|*.*pas)|*.pas|All files|*.*'
+    Filter = 'Pascal source files|*.pas|All files|*.*'
     Left = 340
     Top = 48
   end
