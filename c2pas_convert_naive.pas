@@ -108,6 +108,31 @@ begin
     (s1 = 'uint64_t');
 end;
 
+function C2Pastype(const s: string): string;
+var
+  s1: string;
+begin
+  s1 := LowerCase(s);
+  if s1 = 'char' then
+    Result := 'Char'
+  else if s1 = 'byte' then
+    Result := 'Byte'
+  else if s1 = 'long' then
+    Result := 'LongInt'
+  else if s1 = 'int' then
+    Result := 'Integer'
+  else if s1 = 'bool' then
+    Result := 'Boolean'
+  else if s1 = 'double' then
+    Result := 'Double'
+  else if s1 = 'float' then
+    Result := 'Single'
+  else if s1 = 'int64_t' then
+    Result := 'int64'
+  else
+    Result := s;
+end;
+
 function isidentifier(const stmp1: string): boolean;
 var
   i: integer;
@@ -1396,8 +1421,19 @@ var
     else
       ipp3 := 0;
 
-    if ipp1 + ipp2 + ipp3 <> 1 then
+    if (ipp1 + ipp2 + ipp3 < 1) and (ipp1 + ipp2 + ipp3 > 2) then
       Exit;
+
+    if (pp1 > 0) and (pp2 > 0) then
+      Exit;
+
+    if (pp1 > 0) and (pp3 > 0) then
+      if pp3 <> pp1 + 1 then
+        Exit;
+
+    if (pp2 > 0) and (pp3 > 0) then
+      if pp3 <> pp2 + 1 then
+        Exit;
 
     if pp1 > 0 then
       splitstring(s2, ftmp, ftmp2, '<')
@@ -1410,6 +1446,19 @@ var
       Exit;
 
     ftmp2 := Trim(ftmp2);
+
+    if ftmp2 = '' then
+      Exit;
+
+    if (pp3 > 0) and (ftmp2[1] = '=') then
+    begin
+      Delete(ftmp2, 1, 1);
+      ftmp2 := Trim(ftmp2);
+    end;
+
+    if ftmp2 = '' then
+      Exit;
+
     if not isintidentifier(ftmp2) then
     begin
       if CountChr(ftmp2, '/') + CountChr(ftmp2, '\') <> 1 then
@@ -1454,7 +1503,9 @@ var
         ftmp2 := '(' + ftmp3 + ' div ' + ftmp4 + ')';
     end;
 
-    if pp1 > 0 then
+    if (pp3 > 0) and (pp1 + pp2 > 0) then
+      sto := ftmp2
+    else if pp1 > 0 then
     begin
       if IsInteger(ftmp2) then
         sto := IntToStr(StrToInt(ftmp2) - 1) + ' {' + ftmp2 + ' - 1}'
