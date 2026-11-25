@@ -78,12 +78,12 @@ end;
 
 function TMemManager.item2ptr(const id: integer): Pointer;
 begin
-  result := pointer(integer(items[id]) + SizeOf(memmanageritem_t));
+  Result := pointer(integer(items[id]) + SizeOf(memmanageritem_t));
 end;
 
 function TMemManager.ptr2item(const ptr: Pointer): integer;
 begin
-  result := Pmemmanageritem_t(Integer(ptr) - SizeOf(memmanageritem_t)).index;
+  Result := Pmemmanageritem_t(Integer(ptr) - SizeOf(memmanageritem_t)).index;
 end;
 
 procedure TMemManager.M_Free(ptr: Pointer);
@@ -144,21 +144,21 @@ begin
   if size = 0 then
   begin
     M_Free(ptr);
-    result := nil;
-    exit;
+    Result := nil;
+    Exit;
   end;
 
   if ptr = nil then
   begin
-    result := M_Malloc(size, tag);
-    exit;
+    Result := M_Malloc(size, tag);
+    Exit;
   end;
 
   i := ptr2item(ptr);
   if items[i].size = size then
   begin
-    result := ptr;
-    exit;
+    Result := ptr;
+    Exit;
   end;
 
   if size > items[i].size then
@@ -170,9 +170,9 @@ begin
   Move(ptr^, tmp^, copysize);
 //  memcpy(tmp, ptr, copysize);
   M_Free(ptr);
-  result := M_Malloc(size, tag);
-//  memcpy(result, tmp, copysize);
-  Move(tmp^, result^, copysize);
+  Result := M_Malloc(size, tag);
+//  memcpy(Result, tmp, copysize);
+  Move(tmp^, Result^, copysize);
 //  memfree(tmp, copysize);
   FreeMem(tmp);
 end;

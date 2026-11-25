@@ -150,14 +150,14 @@ function firstword(const inp: string; const splitter: string = ' '): string; ove
 var
   tmp: string;
 begin
-  splitstring(inp, result, tmp, splitter);
+  splitstring(inp, Result, tmp, splitter);
 end;
 
 function firstword(const inp: string; const splitters: charset_t): string; overload;
 var
   tmp: string;
 begin
-  splitstring(inp, result, tmp, splitters);
+  splitstring(inp, Result, tmp, splitters);
 end;
 
 function secondword(const inp: string; const splitter: string = ' '): string; overload;
@@ -180,15 +180,15 @@ function lastword(const inp: string; const splitter: string = ' '): string; over
 var
   i: integer;
 begin
-  result := '';
+  Result := '';
   i := length(inp);
   while i > 0 do
   begin
     if inp[i] = splitter then
-      exit
+      Exit
     else
     begin
-      result := inp[i] + result;
+      Result := inp[i] + Result;
       dec(i);
     end;
   end;
@@ -198,15 +198,15 @@ function lastword(const inp: string; const splitters: charset_t): string; overlo
 var
   i: integer;
 begin
-  result := '';
+  Result := '';
   i := length(inp);
   while i > 0 do
   begin
     if inp[i] in splitters then
-      exit
+      Exit
     else
     begin
-      result := inp[i] + result;
+      Result := inp[i] + Result;
       dec(i);
     end;
   end;
@@ -225,8 +225,8 @@ begin
     else
       stmp := stmp + s[i];
   end;
-  result := TStringList.Create;
-  result.Text := stmp;
+  Result := TStringList.Create;
+  Result.Text := stmp;
 end;
 
 procedure DeleteBlanks(s: TStringList);
@@ -242,16 +242,16 @@ function IsIdentifier(const s: string): boolean;
 var
   i: integer;
 begin
-  result := False;
+  Result := False;
   if Length(s) = 0 then
-    exit;
+    Exit;
 
   for i := 1 to Length(s) do
     if not (s[i] in ['-', '.', '^', '[', ']', 'a'..'z', 'A'..'Z', '0', '1'..'9', '_']) then
-      exit;
+      Exit;
 
   if Pos('-', s) > 1 then
-    exit;
+    Exit;
     
   Result := not (s[1] in ['0', '1'..'9']);
 end;
@@ -262,25 +262,25 @@ var
 begin
   if Length(s) = 0 then
   begin
-    result := false;
-    exit;
+    Result := False;
+    Exit;
   end;
 
   if s[1] = '$' then
   begin
     if Length(s) < 2 then
     begin
-      Result := false;
-      exit;
+      Result := False;
+      Exit;
     end;
-    Result := false;
+    Result := False;
     for i := 2 to Length(s) do
       if not (s[i] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A'..'F', 'a'..'f']) then
         Exit;
-    result := true;
-    exit;
+    Result := True;
+    Exit;
   end;
-  result := IntToStr(StrToIntDef(s, -1)) = s;
+  Result := IntToStr(StrToIntDef(s, -1)) = s;
 end;
 
 function IsNumber(const s: string): boolean;
@@ -302,10 +302,10 @@ var
   i, j: integer;
   plevel: integer;
 begin
-  result := false;
+  Result := False;
 
   if s = '' then
-    exit;
+    Exit;
 
   plevel := 0;
 
@@ -327,8 +327,8 @@ begin
         _after := Trim(_after);
         _before := Trim(_before);
         _in := Trim(_in);
-        result := true;
-        exit;
+        Result := True;
+        Exit;
       end;
     end
     else
@@ -349,17 +349,17 @@ function LeadingSpaces(const s: string): integer;
 var
   i: integer;
 begin
-  result := 0;
+  Result := 0;
   i := 1;
   while i <= Length(s) do
   begin
     if s[i] = ' ' then
     begin
-      inc(result);
+      inc(Result);
       inc(i);
     end
     else
-      exit;
+      Exit;
   end;
 end;
 
@@ -367,24 +367,24 @@ function s_spaces(const x: integer): string;
 var
   i: integer;
 begin
-  result := '';
+  Result := '';
   for i := 1 to x do
-    result := Result + ' ';
+    Result := Result + ' ';
 end;
 
 procedure removetrailingNL(var s: string);
 begin
-  while true do
+  while True do
   begin
     if Length(s) > 2 then
     begin
       if (s[Length(s) - 1] = #13) and (s[Length(s)] = #10) then
         SetLength(s, Length(s) - 2)
       else
-        exit;
+        Exit;
     end
     else
-      exit;
+      Exit;
   end;
 end;
 
@@ -392,14 +392,14 @@ function removequotes(s: string; q: charset_t): string;
 begin
   if s = '' then
   begin
-    result := '';
-    exit;
+    Result := '';
+    Exit;
   end;
   if s[1] in q then
     s[1] := ' ';
   if s[Length(s)] in q then
     s[Length(s)] := ' ';
-  result := Trim(s);
+  Result := Trim(s);
 end;
 
 function pascalnumber(s: string): string;
@@ -407,7 +407,7 @@ begin
   if Length(s) = 0 then
   begin
     Result := '';
-    exit;
+    Exit;
   end;
 
   if IsInteger(s) then
@@ -416,7 +416,7 @@ begin
       s[1] := ' ';
       s[2] := '$';
       Result := Trim(s);
-      exit;
+      Exit;
     end;
 
   if IsNumber(s) then
@@ -439,11 +439,11 @@ begin
       Dec(plevel);
     if plevel < 0 then
     begin
-      result := false;
-      exit;
+      Result := False;
+      Exit;
     end;
   end;
-  result := plevel = 0;
+  Result := plevel = 0;
 end;
 
 function CountChr(const s: string; const c: Char): integer;
@@ -482,9 +482,9 @@ end;
 function TDNumberList.Get(Index: Integer): integer;
 begin
   if (Index < 0) or (Index >= fNumItems) then
-    result := 0
+    Result := 0
   else
-    result := fList[Index];
+    Result := fList[Index];
 end;
 
 procedure TDNumberList.Put(Index: Integer; const value: integer);
@@ -496,7 +496,7 @@ function TDNumberList.Add(const value: integer): integer;
 begin
   ReallocMem(fList, (fNumItems + 1) * SizeOf(integer));
   Put(fNumItems, value);
-  result := fNumItems;
+  Result := fNumItems;
   inc(fNumItems);
 end;
 
@@ -514,8 +514,8 @@ var
 begin
   if (Index < 0) or (Index >= fNumItems) then
   begin
-    result := false;
-    exit;
+    Result := False;
+    Exit;
   end;
 
   for i := Index + 1 to fNumItems - 1 do
@@ -524,7 +524,7 @@ begin
   ReallocMem(fList, (fNumItems - 1) * SizeOf(integer));
   dec(fNumItems);
 
-  result := true;
+  Result := True;
 end;
 
 function TDNumberList.IndexOf(const value: integer): integer;
@@ -534,10 +534,10 @@ begin
   for i := 0 to fNumItems - 1 do
     if fList[i] = value then
     begin
-      result := i;
-      exit;
+      Result := i;
+      Exit;
     end;
-  result := -1;
+  Result := -1;
 end;
 
 procedure TDNumberList.Clear;

@@ -95,7 +95,7 @@ var
 implementation
 
 uses
-  qforms, c2pas_convert, c2pas_convert_naive;
+  c2pas_convert, c2pas_convert_naive;
 
 {$R *.dfm}
 
@@ -134,22 +134,22 @@ begin
     ret := MessageBox(Handle, 'Do you want to save changes?', PChar(rsTitle), MB_YESNOCANCEL or MB_ICONQUESTION or MB_APPLMODAL);
     if ret = IDCANCEL then
     begin
-      result := false;
+      Result := False;
       exit;
     end;
     if ret = IDNO then
     begin
-      result := true;
+      Result := True;
       exit;
     end;
     if ret = IDYES then
     begin
       SaveButton1Click(self);
-      result := not changed;
+      Result := not changed;
       exit;
     end;
   end;
-  result := true;
+  Result := True;
 end;
 
 procedure TForm1.NewButton1Click(Sender: TObject);
@@ -164,7 +164,7 @@ begin
   Memo1.Lines.Clear;
   Memo2.Lines.Clear;
   SetFileName('');
-  changed := false;
+  changed := False;
 end;
 
 function MkSortName(const fname: string): string;
@@ -173,10 +173,10 @@ var
 begin
   if Length(fname) < 40 then
   begin
-    result := fname;
+    Result := fname;
     exit;
   end;
-  result := '';
+  Result := '';
   for i := Length(fname) downto Length(fname) - 35 do
     Result := fname[i] + Result;
   Result := '...' + Result;
@@ -233,7 +233,7 @@ procedure TForm1.DoSave(const fname: string);
 begin
   SetFileName(fname);
   Memo2.Lines.SaveToFile(ffilename);
-  changed := false;
+  changed := False;
 end;
 
 procedure TForm1.AboutButton1Click(Sender: TObject);
@@ -242,7 +242,8 @@ begin
     Handle,
     PChar(Format('%s'#13#10'Version 1.0'#13#10#13#10'A tool for translating C source code to Pascal.'#13#10, [rsTitle])),
     PChar(rsTitle),
-    MB_OK or MB_ICONINFORMATION or MB_APPLMODAL);
+    MB_OK or MB_ICONINFORMATION or MB_APPLMODAL
+  );
 end;
 
 procedure TForm1.SaveAsButton1Click(Sender: TObject);
@@ -253,7 +254,7 @@ end;
 
 procedure TForm1.Memo2Change(Sender: TObject);
 begin
-  changed := true;
+  changed := True;
 end;
 
 procedure TForm1.OpenButton1Click(Sender: TObject);

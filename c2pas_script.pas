@@ -110,7 +110,7 @@ begin
   Inherited Create;
   fBracketLevel := 0;
   fParenthesisLevel := 0;
-  fNewLine := false;
+  fNewLine := False;
   Clear;
   SetText(tx);
 end;
@@ -123,7 +123,7 @@ end;
 
 function TScriptEngine.fToken: string;
 begin
-  result := sc_String;
+  Result := sc_String;
 end;
 
 procedure TScriptEngine.Clear;
@@ -136,9 +136,9 @@ begin
   ScriptPtr := ScriptBuffer;
   ScriptEndPtr := ScriptPtr + ScriptSize;
   sc_Line := 1;
-  sc_End := false;
+  sc_End := False;
   sc_String := @StringBuffer[0];
-  AlreadyGot := false;
+  AlreadyGot := False;
 end;
 
 procedure TScriptEngine.SetText(const tx: string);
@@ -157,9 +157,9 @@ begin
   ScriptPtr := ScriptBuffer;
   ScriptEndPtr := ScriptPtr + ScriptSize;
   sc_Line := 1;
-  sc_End := false;
+  sc_End := False;
   sc_String := @StringBuffer[0];
-  AlreadyGot := false;
+  AlreadyGot := False;
 end;
 
 procedure TScriptEngine.ScriptError(const err: string);
@@ -201,13 +201,13 @@ begin
       ScriptError(
           'TScriptEngine.GetInteger(): Bad numeric constant "%s" at Line %d',
           [sc_String, sc_Line]);
-      result := false;
-      exit;
+      Result := False;
+      Exit;
     end;
-    result := true;
+    Result := True;
   end
   else
-    result := true;
+    Result := True;
 end;
 
 procedure TScriptEngine.MustGetInteger;
@@ -243,15 +243,15 @@ begin
           ScriptError(
               'TScriptEngine.GetFloat(): Bad numeric constant "%s" at Line %d',
               [sc_String, sc_Line]);
-          result := false;
-          exit;
+          Result := False;
+          Exit;
         end;
       end;
     end;
-    result := true;
+    Result := True;
   end
   else
-    result := true;
+    Result := True;
 end;
 
 procedure TScriptEngine.MustGetFloat;
@@ -263,12 +263,12 @@ end;
 procedure TScriptEngine.UnGet;
 // Assumes there is a valid string in sc_String.
 begin
-  AlreadyGot := true;
+  AlreadyGot := True;
 end;
 
 function TScriptEngine.MatchString(const str: string): boolean;
 begin
-  result := Compare(str);
+  Result := Compare(str);
 end;
 
 function TScriptEngine.MatchString(const strs: TStringList): integer;
@@ -281,16 +281,16 @@ begin
   begin
     if Compare(strs.Strings[i]) then
     begin
-      result := i;
-      exit;
+      Result := i;
+      Exit;
     end;
   end;
-  result := -1;
+  Result := -1;
 end;
 
 function TScriptEngine.MatchPosString(const str: string): boolean;
 begin
-  result := Pos(UpperCase(str), UpperCase(sc_String)) > 0;
+  Result := Pos(UpperCase(str), UpperCase(sc_String)) > 0;
 end;
 
 function TScriptEngine.MustMatchString(strs: TStringList): integer;
@@ -301,12 +301,12 @@ begin
   if i = -1 then
     ScriptError('TScriptEngine.MustMatchString(): List'#13#10'%s'#13#10'expected at Line %d',  [strs.Text, sc_Line]);
 
-  result := i;
+  Result := i;
 end;
 
 function TScriptEngine.Compare(const txt: string): boolean;
 begin
-  result := UpperCase(txt) = UpperCase(sc_String);
+  Result := UpperCase(txt) = UpperCase(sc_String);
 end;
 
 function TScriptEngine.GetString: boolean;
@@ -316,18 +316,18 @@ var
 begin
   if AlreadyGot then
   begin
-    AlreadyGot := false;
-    result := true;
-    exit;
+    AlreadyGot := False;
+    Result := True;
+    Exit;
   end;
 
-  fNewLine := false;
-  foundToken := false;
+  fNewLine := False;
+  foundToken := False;
   if ScriptPtr >= ScriptEndPtr then
   begin
-    sc_End := true;
-    result := false;
-    exit;
+    sc_End := True;
+    Result := False;
+    Exit;
   end;
 
   while not foundToken do
@@ -336,9 +336,9 @@ begin
     begin
       if ScriptPtr >= ScriptEndPtr then
       begin
-        sc_End := true;
-        result := false;
-        exit;
+        sc_End := True;
+        Result := False;
+        Exit;
       end;
       if ScriptPtr^ = '{' then
         inc(fBracketLevel)
@@ -359,30 +359,30 @@ begin
       else if ScriptPtr^ = Chr(10) then
       begin
         inc(sc_Line);
-        fNewLine := true;
+        fNewLine := True;
       end;
       inc(ScriptPtr);
     end;
 
     if ScriptPtr >= ScriptEndPtr then
     begin
-      sc_End := true;
-      result := false;
-      exit;
+      sc_End := True;
+      Result := False;
+      Exit;
     end;
 
     if ScriptPtr^ <> ASCII_COMMENT1 then
     begin // Found a token
-      foundToken := true;
+      foundToken := True;
     end
     else
     begin // Skip comment
 
       if ScriptPtr >= ScriptEndPtr then
       begin
-        sc_End := true;
-        result := false;
-        exit;
+        sc_End := True;
+        Result := False;
+        Exit;
       end;
       inc(ScriptPtr);
       if ScriptPtr^ = ASCII_COMMENT1 then
@@ -391,14 +391,14 @@ begin
         begin
           if ScriptPtr >= ScriptEndPtr then
           begin
-            sc_End := true;
-            result := false;
-            exit;
+            sc_End := True;
+            Result := False;
+            Exit;
           end;
           inc(ScriptPtr);
         end;
         inc(sc_Line);
-        fNewLine := true;
+        fNewLine := True;
       end;
     end;
   end;
@@ -433,30 +433,30 @@ begin
     end;
   end;
   txt^ := Chr(0);
-  result := true;
+  Result := True;
 end;
 
 function TScriptEngine.GetStringEOL: string;
 begin
-  result := '';
+  Result := '';
   if not GetString then
-    exit;
+    Exit;
 
   if fNewLine then
   begin
-    AlreadyGot := true;
-    exit;
+    AlreadyGot := True;
+    Exit;
   end;
-  result := sc_string;
+  Result := sc_string;
   while not sc_End and not fNewLine do
   begin
     GetString;
     if fNewLine then
     begin
-      AlreadyGot := true;
-      exit;
+      AlreadyGot := True;
+      Exit;
     end;
-    result := result + ' ' + sc_string;
+    Result := Result + ' ' + sc_string;
   end;
 end;
 
@@ -467,7 +467,7 @@ var
   s: TStringList;
   i, p: integer;
 begin
-  result := '';
+  Result := '';
   s := TStringList.Create;
   try
     s.Text := sctext;
@@ -481,7 +481,7 @@ begin
       if p > 0 then
         stmp := Copy(stmp, 1, p - 1);
       if stmp <> '' then
-        result := result + stmp + #13#10;
+        Result := Result + stmp + #13#10;
     end;
   finally
     s.Free;

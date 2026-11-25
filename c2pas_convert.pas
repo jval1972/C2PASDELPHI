@@ -131,7 +131,7 @@ var
   i: integer;
 begin
   if Length(s) = 0 then
-    exit;
+    Exit;
 
   if fnumitems >= frealnumitems then
   begin
@@ -153,7 +153,7 @@ var
   len: integer;
 begin
   if p[0] = #0 then
-    exit;
+    Exit;
 
   try
     if fnumitems >= frealnumitems then
@@ -203,7 +203,7 @@ begin
 
   Result := '';
   if fitems[index]._type = FCT_NONE then
-    exit;
+    Exit;
     
   i := 0;
   while fitems[index]._string[i] <> #0 do
@@ -369,10 +369,10 @@ begin
   for i := Low(pascal_reserved_words) to High(pascal_reserved_words) do
     if s = pascal_reserved_words[i] then
     begin
-      Result := true;
-      exit;
+      Result := True;
+      Exit;
     end;
-  Result := false;
+  Result := False;
 end;
 
 function ansickeyword(const s: string): boolean;
@@ -382,10 +382,10 @@ begin
   for i := Low(ansi_c_reserved_words) to High(ansi_c_reserved_words) do
     if s = ansi_c_reserved_words[i] then
     begin
-      Result := true;
-      exit;
+      Result := True;
+      Exit;
     end;
-  Result := false;
+  Result := False;
 end;
 
 type
@@ -446,7 +446,7 @@ begin
   Result._type := a[start]._type;
   Result._type2 := 255;
   i := start;
-  while true do
+  while True do
   begin
     if a[i]._type = FCT_NONE then
     begin
@@ -454,7 +454,7 @@ begin
       Result._type := FCT_NONE;
       Result._type2 := FCT_NONE;
       start := i;
-      exit;
+      Exit;
     end;
     while whitespace(a[i]._char) do
     begin
@@ -465,7 +465,7 @@ begin
     if Result._str <> '' then
     begin
       start := i;
-      exit;
+      Exit;
     end;
     start := i;
     while a[i]._type <> FCT_NONE do
@@ -590,7 +590,7 @@ begin
             Inc(i);
           end;
           start := i;
-          exit;
+          Exit;
         end;
       end;
       Inc(i);
@@ -606,12 +606,12 @@ var
 begin
   Result := '';
   i := start;
-  while true do
+  while True do
   begin
     if a[i]._type = FCT_NONE then
     begin
       start := i;
-      exit;
+      Exit;
     end;
     while whitespace(a[i]._char) do
     begin
@@ -622,7 +622,7 @@ begin
     if Result <> '' then
     begin
       start := i;
-      exit;
+      Exit;
     end;
     start := i;
     while a[i]._type <> FCT_NONE do
@@ -746,7 +746,7 @@ begin
             Inc(i);
           end;
           start := i;
-          exit;
+          Exit;
         end;
       end;
       Inc(i);
@@ -770,13 +770,13 @@ begin
     m.Add(token._str, token._type, token._type2)
   end;
 
-{  while true do
+{  while True do
   begin
     token := analisis_nexttoken(a, i);
     if token._type <> FCT_NONE then
       m.Add(token._str, token._type, token._type2)
     else
-      exit;
+      Exit;
   end;}
 end;
 
@@ -816,7 +816,7 @@ begin
       Result := x1
     else
       Result := -1;
-    exit;
+    Exit;
   end;
 
   Result := -1;
@@ -832,10 +832,10 @@ begin
     if a[i]._char = c then
     begin
       Result := i;
-      exit;
+      Exit;
     end;
     if a[i]._type = FCT_NONE then
-      exit;
+      Exit;
     i := i + dx;
   end;
 end;
@@ -858,7 +858,7 @@ begin
             a[i]._type := FCT_DEFINE;
             Inc(i);
             if a[i]._type = FCT_NONE then
-              exit;
+              Exit;
           end;
           Inc(i);
         until SearchAnalisis(a, '\', i - 2, j + 1) = -1;
@@ -988,7 +988,7 @@ begin
   if _fuses.Count = 0 then
   begin
     Result := '';
-    exit;
+    Exit;
   end;
   Result := 'uses'#13#10;
   for i := 0 to _fuses.Count - 1 do
@@ -1009,7 +1009,7 @@ begin
   if _fconsts.Count = 0 then
   begin
     Result := '';
-    exit;
+    Exit;
   end;
   Result := Result + 'const'#13#10;
   for i := 0 to _fconsts.Count - 1 do
@@ -1024,7 +1024,7 @@ begin
   if _fprocs.Count = 0 then
   begin
     Result := '';
-    exit;
+    Exit;
   end;
   for i := 0 to _fprocs.Count - 1 do
     Result := Result + _fprocs.Strings[i] + #13#10#13#10;
@@ -1038,7 +1038,7 @@ begin
   if _ftypes.Count = 0 then
   begin
     Result := '';
-    exit;
+    Exit;
   end;
   Result := Result + 'type'#13#10;
   for i := 0 to _ftypes.Count - 1 do
@@ -1053,7 +1053,7 @@ begin
   if _fvars.Count = 0 then
   begin
     Result := '';
-    exit;
+    Exit;
   end;
   Result := Result + 'var'#13#10;
   for i := 0 to _fvars.Count - 1 do
@@ -1070,7 +1070,7 @@ begin
     if fmanager.Strings[ii] = sr then
     begin
       Result := ii;
-      exit;
+      Exit;
     end;
   Result := -1;
 end;
@@ -1093,7 +1093,7 @@ begin
     if fmanager.Types[Result] = FCT_NONE then
     begin
       Result := -1;
-      exit;
+      Exit;
     end;
     Inc(Result);
   end;
@@ -1124,7 +1124,7 @@ var
 begin
   Result := '';
   if fmanager.Types[pos] <> FCT_SOURCE then
-    exit;
+    Exit;
 
   next := nexttoken(pos);
   if next = -1 then
@@ -1138,19 +1138,19 @@ begin
     Exit;
 
   if pos > fmanager.Count - 5 then
-    exit;
+    Exit;
 
   p_equal := Searchforward(pos + 1, '=');
   if p_equal < 0 then
-    exit;
+    Exit;
 
   p_stop := Searchforward(pos + 1, ';');
 
   if p_stop < p_equal then
-    exit;
+    Exit;
 
   if not checkbracketsclosed(tokenrange(pos + 1, p_equal - 1), '[', ']') then
-    exit;
+    Exit;
 
   p_br1 := Searchforward(pos + 1, '[');
   p_br2 := Searchforward(pos + 1, ']');
@@ -1173,7 +1173,7 @@ begin
       if fmanager.Strings[i] <> '[' then
       begin
         n.free;
-        exit;
+        Exit;
       end;
 
       i := nexttoken(i);
@@ -1184,7 +1184,7 @@ begin
         if not IsInteger(fmanager.Strings[i]) then
         begin
           n.free;
-          exit;
+          Exit;
         end;
 
         n.Add(fmanager.Strings[i]);
@@ -1193,7 +1193,7 @@ begin
         if fmanager.Strings[i] <> ']' then
         begin
           n.free;
-          exit;
+          Exit;
         end;
 
         i := nexttoken(i);
@@ -1232,7 +1232,7 @@ var
   begin
     i_type := nexttoken(prevblock);
     if i_type = -1 then
-      exit;
+      Exit;
 
     i_var := nexttoken(i_type);
     if i_var = -1 then
@@ -1252,7 +1252,7 @@ var
       Exit;
 
     if not checkbracketsclosed(tokenrange(eq_pos + 1, p_stop - 1), '{', '}') then
-      exit;
+      Exit;
 
     xx := eq_pos;
     while xx < p_stop do
@@ -1263,7 +1263,7 @@ var
       if (fmanager.Strings[xx] = ';') then
         if xx = p_stop then
           break;
-      exit;
+      Exit;
     end;
     ReplaceTokens(eq_pos + 1, p_stop - 1, '{', '(');
     ReplaceTokens(eq_pos + 1, p_stop - 1, '}', ')');
@@ -1277,7 +1277,7 @@ begin
   begin
     p_stop := Searchforward(i, ';');
     if p_stop = -1 then
-      exit;
+      Exit;
 
     _check;
     prevblock := i;
@@ -1299,7 +1299,7 @@ var
   begin
     i_type := nexttoken(prevblock);
     if i_type = -1 then
-      exit;
+      Exit;
 
     if fmanager.Strings[i_type] <> 'typedef' then
       Exit;
@@ -1319,7 +1319,7 @@ var
       Exit;
 
     if not checkbracketsclosed(tokenrange(i_var + 1, p_stop - 1), '{', '}') then
-      exit;
+      Exit;
 
 (*    xx := i_var;
     while xx < p_stop do
@@ -1330,7 +1330,7 @@ var
       if (fmanager.Strings[xx] = ';') then
         if xx = p_stop then
           break;
-      exit;
+      Exit;
     end;*)
     ReplaceTokens(i_var + 1, p_stop - 1, '{', '(');
     ReplaceTokens(i_var + 1, p_stop - 1, '}', ')');
@@ -1344,7 +1344,7 @@ begin
   begin
     p_stop := Searchforward(i, ';');
     if p_stop = -1 then
-      exit;
+      Exit;
 
     _check;
     prevblock := i;
@@ -1364,7 +1364,7 @@ begin
   InitArraysPass;
   InitTypeDefEnumsPass;
   i := 0;
-  dowhitespace := true;
+  dowhitespace := True;
   while i < fmanager.Count - 1 do
   begin
     _typ := fmanager.Types[i];
@@ -1407,7 +1407,7 @@ begin
         else
         begin
           Result := Result + '{$DEFINE ' + s1 + '}';
-          dowhitespace := true;
+          dowhitespace := True;
         end;
       end
       else if Pos('#ifdef ', _str) = 1 then
@@ -1416,7 +1416,7 @@ begin
         s1 := Trim(firstword(_str));
         s2 := Trim(secondword(_str));
         Result := Result + '{$IFDEF ' + s1 + '} ' + s2 + #13#10;
-        dowhitespace := true;
+        dowhitespace := True;
       end
       else if Pos('#ifndef ', _str) = 1 then
       begin
@@ -1424,13 +1424,13 @@ begin
         s1 := Trim(firstword(_str));
         s2 := Trim(secondword(_str));
         Result := Result + '{$IFNDEF ' + s1 + '} ' + s2 + #13#10;
-        dowhitespace := true;
+        dowhitespace := True;
       end
       else if Pos('#endif ', _str) = 1 then
       begin
         _str := Trim(RightStr(_str, Length(_str) - 6));
         Result := Result + '{$ENDIF} ' + _str + #13#10;
-        dowhitespace := true;
+        dowhitespace := True;
       end;
       Inc(i);
       Continue;
@@ -1897,13 +1897,13 @@ begin
         stmp := c2pas_doReplace(stmp, ':= &', ':= @');
         stmp := c2pas_doReplace(stmp, ' then  ', ' then ');
         stmp := c2pas_convert_for(stmp);
-        stmp := c2pas_doReplace(stmp, ' ? true : false;'#13#10, ' <> 0;'#13#10);
-        stmp := c2pas_doReplace(stmp, #13#10' return true;'#13#10'end'#13#10#13#10, #13#10' Result := true;'#13#10'end;'#13#10#13#10);
-        stmp := c2pas_doReplace(stmp, #13#10' return false;'#13#10'end'#13#10#13#10, #13#10' Result := false;'#13#10'end;'#13#10#13#10);
-        stmp := c2pas_doReplace(stmp, #13#10'  return true;'#13#10'end'#13#10#13#10, #13#10'  Result := true;'#13#10'end;'#13#10#13#10);
-        stmp := c2pas_doReplace(stmp, #13#10'  return false;'#13#10'end'#13#10#13#10, #13#10'  Result := false;'#13#10'end;'#13#10#13#10);
-        stmp := c2pas_doReplace(stmp, #13#10'  return true;'#13#10'end;'#13#10#13#10, #13#10'  Result := true;'#13#10'end;'#13#10#13#10);
-        stmp := c2pas_doReplace(stmp, #13#10'  return false;'#13#10'end;'#13#10#13#10, #13#10'  Result := false;'#13#10'end;'#13#10#13#10);
+        stmp := c2pas_doReplace(stmp, ' ? True : False;'#13#10, ' <> 0;'#13#10);
+        stmp := c2pas_doReplace(stmp, #13#10' return True;'#13#10'end'#13#10#13#10, #13#10' Result := True;'#13#10'end;'#13#10#13#10);
+        stmp := c2pas_doReplace(stmp, #13#10' return False;'#13#10'end'#13#10#13#10, #13#10' Result := False;'#13#10'end;'#13#10#13#10);
+        stmp := c2pas_doReplace(stmp, #13#10'  return True;'#13#10'end'#13#10#13#10, #13#10'  Result := True;'#13#10'end;'#13#10#13#10);
+        stmp := c2pas_doReplace(stmp, #13#10'  return False;'#13#10'end'#13#10#13#10, #13#10'  Result := False;'#13#10'end;'#13#10#13#10);
+        stmp := c2pas_doReplace(stmp, #13#10'  return True;'#13#10'end;'#13#10#13#10, #13#10'  Result := True;'#13#10'end;'#13#10#13#10);
+        stmp := c2pas_doReplace(stmp, #13#10'  return False;'#13#10'end;'#13#10#13#10, #13#10'  Result := False;'#13#10'end;'#13#10#13#10);
         stmp := c2pas_doReplace(stmp, '(void)'#13#10, ';'#13#10);
         stmp := c2pas_doReplace(stmp, #13#10'  end else if ', #13#10'  end'#13#10'  else if ');
         stmp := c2pas_doReplace(stmp, #13#10'    end else if ', #13#10'    end'#13#10'    else if ');
@@ -1913,8 +1913,8 @@ begin
         stmp := c2pas_doReplace(stmp, #13#10'    end else begin'#13#10, #13#10'    end'#13#10'    else'#13#10'    begin'#13#10);
         stmp := c2pas_doReplace(stmp, #13#10'      end else begin'#13#10, #13#10'      end'#13#10'      else'#13#10'      begin'#13#10);
         stmp := c2pas_doReplace(stmp, ' case ', ' ');
-        stmp := c2pas_doReplace(stmp, #13#10'  while (true) begin'#13#10, #13#10'  while true do'#13#10'  begin'#13#10);
-        stmp := c2pas_doReplace(stmp, #13#10'    while (true) begin'#13#10, #13#10'    while true do'#13#10'    begin'#13#10);
+        stmp := c2pas_doReplace(stmp, #13#10'  while (True) begin'#13#10, #13#10'  while True do'#13#10'  begin'#13#10);
+        stmp := c2pas_doReplace(stmp, #13#10'    while (True) begin'#13#10, #13#10'    while True do'#13#10'    begin'#13#10);
         stmp := c2pas_convert_if3(stmp);
         stmp := c2pas_convert_while1(stmp);
         stmp := c2pas_convert_assignments(stmp);
@@ -1924,8 +1924,8 @@ begin
         stmp := c2pas_convert_switch(stmp);
         stmp := c2pas_doReplace(stmp, ' switch(', ' case ');
 
-        stmp := c2pas_doReplace(stmp, #13#10'  return true;'#13#10'}'#13#10#13#10, #13#10'  Result := true;'#13#10'end;'#13#10#13#10);
-        stmp := c2pas_doReplace(stmp, #13#10'  return false;'#13#10'}'#13#10#13#10, #13#10'  Result := false;'#13#10'end;'#13#10#13#10);
+        stmp := c2pas_doReplace(stmp, #13#10'  return True;'#13#10'}'#13#10#13#10, #13#10'  Result := True;'#13#10'end;'#13#10#13#10);
+        stmp := c2pas_doReplace(stmp, #13#10'  return False;'#13#10'}'#13#10#13#10, #13#10'  Result := False;'#13#10'end;'#13#10#13#10);
         stmp := c2pas_doReplace(stmp, ';'#13#10'}'#13#10#13#10, ';'#13#10'end;'#13#10#13#10);
         stmp := c2pas_doReplace(stmp, ';'#13#10'}'#13#10#13#10, ';'#13#10'end;'#13#10#13#10);
         stmp := c2pas_doReplace(stmp, 'end '#13#10'}'#13#10#13#10, 'end;'#13#10'end;'#13#10#13#10);
@@ -2207,7 +2207,7 @@ var
     s2: string;
   begin
     if pos < 1 then
-      exit;
+      Exit;
 
     plevel := 0;
     maxplevel := -1;
@@ -2277,11 +2277,11 @@ var
     if (Pos(' if ', s1) = 0) and (Pos(#10'if ', s1) = 0) and
        (Pos(' if(', s1) = 0) and (Pos(#10'if(', s1) = 0) then
     begin
-      Result := false;
+      Result := False;
       Exit;
     end;
 
-    Result := true;
+    Result := True;
     parse_if(Pos(' if ', s1));
     parse_if(Pos(#10'if ', s1));
     parse_if(Pos(' if(', s1));
@@ -2312,7 +2312,7 @@ begin
   if Length(src) < 8 then
   begin
     Result := src;
-    exit;
+    Exit;
   end;
   lastln := (src[Length(src) - 1] = #13) and (src[Length(src)] = #10);
 
@@ -2382,47 +2382,47 @@ begin
       if then_pos1 = then_pos2 then
         stmp := StringReplace(stmp, ' then begin', ' then'#13#10 + s_spaces(LeadingSpaces(stmp)) + 'begin', []);
 
-    then_pos1 := Pos(' then  return true;', stmp);
+    then_pos1 := Pos(' then  return True;', stmp);
     if (then_pos1 > 0) then
-      stmp := StringReplace(stmp, ' then  return true;',
+      stmp := StringReplace(stmp, ' then  return True;',
          ' then'#13#10 +
          s_spaces(LeadingSpaces(stmp)) + 'begin'#13#10 +
-         s_spaces(LeadingSpaces(stmp) + 2) + 'Result := true;'#13#10 +
-         s_spaces(LeadingSpaces(stmp) + 2) + 'exit;'#13#10 +
+         s_spaces(LeadingSpaces(stmp) + 2) + 'Result := True;'#13#10 +
+         s_spaces(LeadingSpaces(stmp) + 2) + 'Exit;'#13#10 +
          s_spaces(LeadingSpaces(stmp)) + 'end;'#13#10, []);
 
-    then_pos1 := Pos(' then return true;', stmp);
+    then_pos1 := Pos(' then return True;', stmp);
     if (then_pos1 > 0) then
-      stmp := StringReplace(stmp, ' then return true;',
+      stmp := StringReplace(stmp, ' then return True;',
          ' then'#13#10 +
          s_spaces(LeadingSpaces(stmp)) + 'begin'#13#10 +
-         s_spaces(LeadingSpaces(stmp) + 2) + 'Result := true;'#13#10 +
-         s_spaces(LeadingSpaces(stmp) + 2) + 'exit;'#13#10 +
+         s_spaces(LeadingSpaces(stmp) + 2) + 'Result := True;'#13#10 +
+         s_spaces(LeadingSpaces(stmp) + 2) + 'Exit;'#13#10 +
          s_spaces(LeadingSpaces(stmp)) + 'end;'#13#10, []);
 
-    then_pos1 := Pos(' then  return false;', stmp);
+    then_pos1 := Pos(' then  return False;', stmp);
     if (then_pos1 > 0) then
-      stmp := StringReplace(stmp, ' then  return false;',
+      stmp := StringReplace(stmp, ' then  return False;',
          ' then'#13#10 +
          s_spaces(LeadingSpaces(stmp)) + 'begin'#13#10 +
-         s_spaces(LeadingSpaces(stmp) + 2) + 'Result := false;'#13#10 +
-         s_spaces(LeadingSpaces(stmp) + 2) + 'exit;'#13#10 +
+         s_spaces(LeadingSpaces(stmp) + 2) + 'Result := False;'#13#10 +
+         s_spaces(LeadingSpaces(stmp) + 2) + 'Exit;'#13#10 +
          s_spaces(LeadingSpaces(stmp)) + 'end;'#13#10, []);
 
-    then_pos1 := Pos(' then return false;', stmp);
+    then_pos1 := Pos(' then return False;', stmp);
     if (then_pos1 > 0) then
-      stmp := StringReplace(stmp, ' then return false;',
+      stmp := StringReplace(stmp, ' then return False;',
          ' then'#13#10 +
          s_spaces(LeadingSpaces(stmp)) + 'begin'#13#10 +
-         s_spaces(LeadingSpaces(stmp) + 2) + 'Result := false;'#13#10 +
-         s_spaces(LeadingSpaces(stmp) + 2) + 'exit;'#13#10 +
+         s_spaces(LeadingSpaces(stmp) + 2) + 'Result := False;'#13#10 +
+         s_spaces(LeadingSpaces(stmp) + 2) + 'Exit;'#13#10 +
          s_spaces(LeadingSpaces(stmp)) + 'end;'#13#10, []);
 
-    then_pos1 := Pos(' then  exit;', stmp);
+    then_pos1 := Pos(' then  Exit;', stmp);
     if (then_pos1 > 0) then
-      stmp := StringReplace(stmp, ' then  exit;',
+      stmp := StringReplace(stmp, ' then  Exit;',
          ' then'#13#10 +
-         s_spaces(LeadingSpaces(stmp) + 2) + 'exit;'#13#10#13#10, []);
+         s_spaces(LeadingSpaces(stmp) + 2) + 'Exit;'#13#10#13#10, []);
 
     stmp := StringReplace(stmp, ' then  ', ' then ', []);
       Result := Result + stmp + #13#10;
@@ -2456,7 +2456,7 @@ begin
   if Length(src) < 8 then
   begin
     Result := src;
-    exit;
+    Exit;
   end;
   lastln := (src[Length(src) - 1] = #13) and (src[Length(src)] = #10);
 
@@ -2469,14 +2469,14 @@ begin
     stmp := s.Strings[i];
     lspaces := LeadingSpaces(stmp);
     stmp := Trim(stmp);
-    _to := false;
-    _downto := false;
+    _to := False;
+    _downto := False;
 
     _ss_i := '';
     _ss_from := '';
     _ss_to := '';
 
-    _no_begin := false;
+    _no_begin := False;
 
     if Length(stmp) > 6 then
       if (LeftStr(stmp, 4) = 'for ') or (LeftStr(stmp, 4) = 'for(') then
@@ -2563,7 +2563,7 @@ begin
         begin
           stmp := MidStr(stmp, 4, Length(stmp) - 3);
           stmp := Trim(stmp);
-          _no_begin := true;
+          _no_begin := True;
           if split_parenthesis(stmp, _before, _in, _after) then
           if _before = '' then
           if Length(_after) > 0 then
@@ -2686,7 +2686,7 @@ begin
   if Length(src) < 8 then
   begin
     Result := src;
-    exit;
+    Exit;
   end;
   lastln := (src[Length(src) - 1] = #13) and (src[Length(src)] = #10);
 
@@ -2731,7 +2731,7 @@ begin
   if Length(src) < 8 then
   begin
     Result := src;
-    exit;
+    Exit;
   end;
   lastln := (src[Length(src) - 1] = #13) and (src[Length(src)] = #10);
 
@@ -2787,7 +2787,7 @@ begin
   if Length(src) < 8 then
   begin
     Result := src;
-    exit;
+    Exit;
   end;
   lastln := (src[Length(src) - 1] = #13) and (src[Length(src)] = #10);
 
@@ -2813,10 +2813,10 @@ begin
     ll := str2list(stmp, [' ']);
     if ll.Count = 3 then
       if ll.Strings[0] = 'while' then
-        if ll.Strings[1] = '(true)' then
+        if ll.Strings[1] = '(True)' then
           if ll.Strings[2] = 'begin' then
           begin
-            Result := Result + s_spaces(lspaces) + 'while true do'#13#10 + s_spaces(lspaces) + 'begin'#13#10;
+            Result := Result + s_spaces(lspaces) + 'while True do'#13#10 + s_spaces(lspaces) + 'begin'#13#10;
             ll.Free;
             Continue;
           end;
@@ -2870,22 +2870,22 @@ var
     ii: integer;
     expr: string;
   begin
-    Result := false;
+    Result := False;
 
     if ll.Count < 3 then
-      exit;
+      Exit;
       
     if not IsIdentifier(ll.Strings[0]) then
-      exit;
+      Exit;
 
     if ll.Strings[1] <> xx then
-      exit;
+      Exit;
 
     if ll.Count = 3 then
     begin
       ss2 := Trim(ll.Strings[2]);
       if Length(ss2) < 1 then
-        exit;
+        Exit;
       if ss2[Length(ss2)] = ';' then
       begin
         ss2[Length(ss2)] := ' ';
@@ -2894,7 +2894,7 @@ var
         begin
           _as_ret := ll.Strings[0] + ' := ' + ll.Strings[0] + ' ' + asgn + ' ' + ss2 + ';';
           Result := True;
-          exit;
+          Exit;
         end;
       end;
     end
@@ -2905,9 +2905,9 @@ var
         expr := expr + ' ' + ll.Strings[ii] + ' ';
       expr := Trim(expr);
       if Length(expr) = 0 then
-        exit;
+        Exit;
       if expr[Length(expr)] <> ';' then
-        exit;
+        Exit;
       expr[Length(expr)] := ' ';
       expr := Trim(expr);
       if Pos(';', expr) = 0 then
@@ -2922,7 +2922,7 @@ var
                   else
                     _as_ret := ll.Strings[0] + ' := ' + ll.Strings[0] + ' ' + asgn + ' ' + expr + ';';
                   Result := True;
-                  exit;
+                  Exit;
                 end;
     end;
   end;
@@ -2931,32 +2931,32 @@ var
   var
     ss2: string;
   begin
-    Result := false;
+    Result := False;
     if ll.Count <> 1 then
-      exit;
+      Exit;
 
     ss2 := Trim(ll.Strings[0]);
     if Length(ss2) < 4 then
-      exit;
+      Exit;
 
     if ss2[Length(ss2)] <> ';' then
-      exit;
+      Exit;
 
     ss2[Length(ss2)] := ' ';
     ss2 := Trim(ss2);
 
     if ss2[Length(ss2)] <> cc then
-      exit;
+      Exit;
 
     if ss2[Length(ss2) - 1] <> cc then
-      exit;
+      Exit;
 
     ss2[Length(ss2)] := ' ';
     ss2[Length(ss2) - 1] := ' ';
     ss2 := Trim(ss2);
 
     if not IsIdentifier(ss2) then
-      exit;
+      Exit;
 
     _as_ret := func + '(' + ss2 + ');';
      Result := True;
@@ -2966,7 +2966,7 @@ begin
   if Length(src) < 8 then
   begin
     Result := src;
-    exit;
+    Exit;
   end;
   lastln := (src[Length(src) - 1] = #13) and (src[Length(src)] = #10);
 
@@ -3038,7 +3038,7 @@ begin
   if Length(src) < 8 then
   begin
     Result := src;
-    exit;
+    Exit;
   end;
   lastln := (src[Length(src) - 1] = #13) and (src[Length(src)] = #10);
 

@@ -226,86 +226,86 @@ end;
 
 function ConvertNaive_Pass1(const sinp: string): string;
 begin
-  result := sinp;
+  Result := sinp;
 
-  result := StringReplace(result, #13#10, #10, [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, #10, #13#10, [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, #9, '  ', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '=&', '=@', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '= &', '= @', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '=  &', '= @', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '(&', '(@', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, #13#10, #10, [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, #10, #13#10, [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, #9, '  ', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '=&', '=@', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '= &', '= @', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '=  &', '= @', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '(&', '(@', [rfReplaceAll, rfIgnoreCase]);
 
-  result := StringReplace(result, '} else ', '}'#13#10'  else ', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '} else ', '}'#13#10'  else ', [rfReplaceAll, rfIgnoreCase]);
 
-  result := StringReplace(result, '|=', #254#250, [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '| =', #254#250, [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '^=', #254#251, [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '^ =', #254#251, [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '&=', #254#252, [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '& =', #254#252, [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '>>=', #254#253, [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '>> =', #254#253, [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '<<=', #254#254, [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '<< =', #254#254, [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '|=', #254#250, [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '| =', #254#250, [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '^=', #254#251, [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '^ =', #254#251, [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '&=', #254#252, [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '& =', #254#252, [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '>>=', #254#253, [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '>> =', #254#253, [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '<<=', #254#254, [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '<< =', #254#254, [rfReplaceAll, rfIgnoreCase]);
 
-  result := StringReplace(result, '==', #255#250, [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '!=', #255#251, [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '>=', #255#252, [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '<=', #255#253, [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '||', '|', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '^^', '^', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '^', ') xor (', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '&&', '&', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '<<', ' shl ', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '>>', ' shr ', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '&', ') and (', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '|', ') or (', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '=', ':=', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, ':=', ' := ', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '  :=', ' :=', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, ':=', ':= ', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '+ :=', '+:=', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '- :=', '-:=', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '* :=', '*:=', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '/ :=', '/:=', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, #255#250, ' = ', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '  =', ' =', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '=  ', '= ', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, #255#251, ' <> ', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '  <>', ' <>', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '<>  ', '<> ', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, #255#252, ' >= ', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '  >=', ' >=', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '>=  ', '>= ', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, #255#253, ' <= ', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '  <=', ' <=', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '<=  ', '<= ', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, 'return;', 'exit;', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '->', '.', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, ' case ', ' ', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, ' switch ', ' case ', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '{', ' begin ', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '}', ' end;', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '"', '''', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '/*', '(*', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '*/', '*)', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '(void)', ';', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, ';;', ';', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '!', ' not ', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, ' )', ')', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '( ', '(', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, ' 0x', ' $', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '(0x', '($', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '[0x', '[$', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, ',0x', ',$', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '#endif', '{$ENDIF}', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '#else', '{$ELSE}', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, #254#250, '|:=', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, #254#251, '^:=', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, #254#252, '&:=', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, #254#253, '>>:=', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, #254#254, '<<:=', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '==', #255#250, [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '!=', #255#251, [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '>=', #255#252, [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '<=', #255#253, [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '||', '|', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '^^', '^', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '^', ') xor (', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '&&', '&', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '<<', ' shl ', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '>>', ' shr ', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '&', ') and (', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '|', ') or (', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '=', ':=', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, ':=', ' := ', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '  :=', ' :=', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, ':=', ':= ', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '+ :=', '+:=', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '- :=', '-:=', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '* :=', '*:=', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '/ :=', '/:=', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, #255#250, ' = ', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '  =', ' =', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '=  ', '= ', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, #255#251, ' <> ', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '  <>', ' <>', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '<>  ', '<> ', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, #255#252, ' >= ', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '  >=', ' >=', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '>=  ', '>= ', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, #255#253, ' <= ', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '  <=', ' <=', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '<=  ', '<= ', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, 'return;', 'Exit;', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '->', '.', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, ' case ', ' ', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, ' switch ', ' case ', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '{', ' begin ', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '}', ' end;', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '"', '''', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '/*', '(*', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '*/', '*)', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '(void)', ';', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, ';;', ';', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '!', ' not ', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, ' )', ')', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '( ', '(', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, ' 0x', ' $', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '(0x', '($', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '[0x', '[$', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, ',0x', ',$', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '#endif', '{$ENDIF}', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '#else', '{$ELSE}', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, #254#250, '|:=', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, #254#251, '^:=', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, #254#252, '&:=', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, #254#253, '>>:=', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, #254#254, '<<:=', [rfReplaceAll, rfIgnoreCase]);
 end;
 
 function ConvertNaive_Pass2(const sinp: string): string;
@@ -559,7 +559,7 @@ begin
     end;
   end;
 
-  result := s2.Text;
+  Result := s2.Text;
   s.Free;
   s2.Free;
 end;
@@ -584,30 +584,30 @@ var
     elsehack: boolean;
     start_skip: integer;
   begin
-    result := stmp;
-    if length(result) = 0 then
-      exit;
-    if stmp[length(result)] <> ';' then
-      exit;
-    p := Pos('+:=', result);
+    Result := stmp;
+    if length(Result) = 0 then
+      Exit;
+    if stmp[length(Result)] <> ';' then
+      Exit;
+    p := Pos('+:=', Result);
     if p < 1 then
-      p := Pos('-:=', result);
+      p := Pos('-:=', Result);
     if p < 1 then
-      p := Pos('*:=', result);
+      p := Pos('*:=', Result);
     if p < 1 then
-      p := Pos('/:=', result);
+      p := Pos('/:=', Result);
     if p < 1 then
-      p := Pos('|:=', result);
+      p := Pos('|:=', Result);
     if p < 1 then
-      p := Pos('&:=', result);
+      p := Pos('&:=', Result);
     if p < 1 then
-      p := Pos('^:=', result);
+      p := Pos('^:=', Result);
     if p < 1 then
-      p := Pos('>>:=', result);
+      p := Pos('>>:=', Result);
     if p < 1 then
-      p := Pos('<<:=', result);
+      p := Pos('<<:=', Result);
     if p < 1 then
-      exit;
+      Exit;
 
     stmp1 := '';
     stmp2 := '';
@@ -616,13 +616,13 @@ var
     start_skip := 3;
     if stmp[p + start_skip] = '=' then
       inc(start_skip);
-    for ii := p + start_skip to length(result) - 1 do
-      stmp2 := stmp2 + result[ii];
+    for ii := p + start_skip to length(Result) - 1 do
+      stmp2 := stmp2 + Result[ii];
 
     stmp1 := trim(stmp1);
     stmp2 := trim(stmp2);
 
-    elsehack := false;
+    elsehack := False;
     if Pos('else ', stmp1) > 0 then
     begin
       stmp1[1] := ' ';
@@ -630,7 +630,7 @@ var
       stmp1[3] := ' ';
       stmp1[4] := ' ';
       stmp1 := Trim(stmp1);
-      elsehack := true;
+      elsehack := True;
     end;
 
     if isidentifier(stmp1) then
@@ -648,9 +648,9 @@ var
         else if praxi = '>' then
           praxi := 'shr';
 
-        result := stmp1 + ' := ' + stmp1 + ' ' + praxi + ' ' + stmp2 + ';';
+        Result := stmp1 + ' := ' + stmp1 + ' ' + praxi + ' ' + stmp2 + ';';
         if elsehack then
-          result := 'else ' + result;
+          Result := 'else ' + Result;
       end;
   end;
 
@@ -663,8 +663,8 @@ begin
   for i := 0 to s.Count - 1 do
   begin
     stmp := s.Strings[i];
-    changed := false;
-    beginhack := false;
+    changed := False;
+    beginhack := False;
     if Pos('PUBLIC ', Trim(stmp)) = 1 then
     begin
       stmp[1] := ' ';
@@ -675,7 +675,7 @@ begin
       stmp[6] := ' ';
       stmp := Trim(stmp);
       s.Strings[i] := stmp;
-      changed := true;
+      changed := True;
     end
     else if Pos('PRIVATE ', Trim(stmp)) = 1 then
     begin
@@ -688,7 +688,7 @@ begin
       stmp[7] := ' ';
       stmp := Trim(stmp);
       s.Strings[i] := stmp;
-      changed := true;
+      changed := True;
     end;
 
     if Trim(stmp) <> 'begin' then
@@ -712,13 +712,13 @@ begin
         else
           break;
       end;
-      changed := true;
-      beginhack := true;
+      changed := True;
+      beginhack := True;
     end;
-    spacehack := false;
+    spacehack := False;
     if nspaces = 1 then
     begin
-      spacehack := true;
+      spacehack := True;
       nspaces := 2;
     end;
     stmp := Trim(s.Strings[i]);
@@ -733,7 +733,7 @@ begin
           stmp[3] := ' ';
           stmp := Trim(stmp);
           stmp := '  ' + stmp + ': integer;';
-          changed := true;
+          changed := True;
         end;
     end
     else if Pos('uint32 ', stmp) = 1 then
@@ -750,7 +750,7 @@ begin
           stmp[6] := ' ';
           stmp := Trim(stmp);
           stmp := '  ' + stmp + ': LongWord;';
-          changed := true;
+          changed := True;
         end;
     end
     else if Pos('word ', stmp) = 1 then
@@ -765,7 +765,7 @@ begin
           stmp[4] := ' ';
           stmp := Trim(stmp);
           stmp := '  ' + stmp + ': word;';
-          changed := true;
+          changed := True;
         end;
     end
     else if Pos('longint ', stmp) = 1 then
@@ -783,7 +783,7 @@ begin
           stmp[7] := ' ';
           stmp := Trim(stmp);
           stmp := '  ' + stmp + ': integer;';
-          changed := true;
+          changed := True;
         end;
     end
     else if Pos('FILE ', stmp) = 1 then
@@ -801,7 +801,7 @@ begin
           for j := 1 to length(stmp) do
             if stmp[j] = '*' then
               stmp[j] := ' ';
-          changed := true;
+          changed := True;
         end;
     end
     else if Pos('long long ', stmp) = 1 then
@@ -821,7 +821,7 @@ begin
           stmp[9] := ' ';
           stmp := Trim(stmp);
           stmp := '  ' + stmp + ': int64;';
-          changed := true;
+          changed := True;
         end;
     end
     else if Pos('long ', stmp) = 1 then
@@ -836,7 +836,7 @@ begin
           stmp[4] := ' ';
           stmp := Trim(stmp);
           stmp := '  ' + stmp + ': integer;';
-          changed := true;
+          changed := True;
         end;
     end
     else if Pos('#ifdef ', stmp) = 1 then
@@ -851,7 +851,7 @@ begin
         stmp[6] := ' ';
         stmp := Trim(stmp);
         stmp := '{$IFDEF ' + stmp + '}';
-        changed := true;
+        changed := True;
       end;
     end
     else if Pos('fixed_t ', stmp) = 1 then
@@ -869,7 +869,7 @@ begin
           stmp[7] := ' ';
           stmp := Trim(stmp);
           stmp := '  ' + stmp + ': fixed_t;';
-          changed := true;
+          changed := True;
         end;
     end
     else if Pos('bool ', stmp) = 1 then
@@ -884,7 +884,7 @@ begin
           stmp[4] := ' ';
           stmp := Trim(stmp);
           stmp := '  ' + stmp + ': boolean;';
-          changed := true;
+          changed := True;
         end;
     end
     else if (Pos('if (', stmp) = 1) or (Pos('if(', stmp) = 1) then
@@ -896,7 +896,7 @@ begin
         stmp := 'if ' + Trim(stmp) + ' then';
         for j := 1 to nspaces do
           stmp := ' ' + stmp;
-        changed := true;
+        changed := True;
       end;
     end
     else if (Pos('while (', stmp) = 1) or (Pos('while(', stmp) = 1) then
@@ -911,7 +911,7 @@ begin
         stmp := 'while ' + Trim(stmp) + ' do';
         for j := 1 to nspaces do
           stmp := ' ' + stmp;
-        changed := true;
+        changed := True;
       end;
     end
     else if (Pos('else if (', stmp) = 1) or (Pos('else if(', stmp) = 1) then
@@ -935,7 +935,7 @@ begin
             stmp := 'else if ' + Trim(stmp) + ' then';
             for j := 1 to nspaces do
               stmp := ' ' + stmp;
-            changed := true;
+            changed := True;
           end;
     end
     else if Pos('void ', stmp) = 1 then
@@ -948,7 +948,7 @@ begin
         stmp[4] := ' ';
         stmp := Trim(stmp);
         stmp := 'procedure ' + stmp;
-        changed := true;
+        changed := True;
       end
       else if stmp[length(stmp)] = ')' then
       begin
@@ -958,7 +958,7 @@ begin
         stmp[4] := ' ';
         stmp := Trim(stmp);
         stmp := 'procedure ' + stmp + ';';
-        changed := true;
+        changed := True;
       end;
     end
     else if (firstword(stmp) = 'static') and (secondword(stmp) = 'void') then
@@ -970,7 +970,7 @@ begin
         stmp := 'procedure ' + s3;
         if s3[length(s3)] = ')' then
           stmp := stmp + ';';
-        changed := true;
+        changed := True;
       end;
     end
     else if (Pos('+:=', stmp) > 0) or (Pos('-:=', stmp) > 0) or (Pos('*:=', stmp) > 0) or (Pos('/:=', stmp) > 0) or
@@ -979,14 +979,14 @@ begin
       stmp := resolvedoubleassigment;
       for j := 1 to nspaces do
         stmp := ' ' + stmp;
-      changed := true;
+      changed := True;
     end
     else if (Pos('''', stmp) = 0) and (Pos('%', stmp) > 0) then
     begin
       stmp := StringReplace(stmp, '%', ' mod ', [rfReplaceAll, rfIgnoreCase]);
       for j := 1 to nspaces do
         stmp := ' ' + stmp;
-      changed := true;
+      changed := True;
     end;
 
     if not changed then
@@ -994,7 +994,7 @@ begin
       begin
         for j := 1 to nspaces do
           stmp := ' ' + stmp;
-        changed := true;
+        changed := True;
       end;
 
     if changed then
@@ -1008,7 +1008,7 @@ begin
     end;
   end;
 
-  result := s.Text;
+  Result := s.Text;
   s.Free;
 end;
 
@@ -1047,7 +1047,7 @@ var
         stmp := stringreplace(stmp, '  ', ' ', [rfReplaceAll, rfIgnoreCase]);
         for xx := 1 to nspaces do
           stmp := ' ' + stmp;
-        changed := true;
+        changed := True;
       end;
     end;
   end;
@@ -1061,7 +1061,7 @@ begin
   for i := 0 to s.Count - 1 do
   begin
     stmp := s.Strings[i];
-    changed := false;
+    changed := False;
     nspaces := 0;
     for j := 1 to length(stmp) do
     begin
@@ -1088,29 +1088,29 @@ begin
       s.Strings[i] := stmp;
   end;
 
-  result := s.Text;
+  Result := s.Text;
   s.Free;
 end;
 
 function ConvertNaive_Pass5(const sinp: string): string;
 begin
-  result := sinp;
+  Result := sinp;
 
-  result := StringReplace(result, ':=  ', ':= ', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '  :=', ' :=', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '  then', ' then', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '  do', ' do', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, ' if  ', ' if ', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '()', '', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '~', ' not ', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '  shr ', ' shr ', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, ' shr  ', ' shr ', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '  shl ', ' shl ', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, ' shl  ', ' shl ', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '  and ', ' and ', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, ' and  ', ' and ', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, '  or ', ' or ', [rfReplaceAll, rfIgnoreCase]);
-  result := StringReplace(result, ' or  ', ' or ', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, ':=  ', ':= ', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '  :=', ' :=', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '  then', ' then', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '  do', ' do', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, ' if  ', ' if ', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '()', '', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '~', ' not ', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '  shr ', ' shr ', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, ' shr  ', ' shr ', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '  shl ', ' shl ', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, ' shl  ', ' shl ', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '  and ', ' and ', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, ' and  ', ' and ', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '  or ', ' or ', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, ' or  ', ' or ', [rfReplaceAll, rfIgnoreCase]);
 end;
 
 function ConvertNaive_Pass6(const sinp: string): string;
@@ -1200,7 +1200,7 @@ begin
     s2.Add(stmp);
   end;
 
-  result := s2.Text;
+  Result := s2.Text;
   s.Free;
   s2.Free;
 end;
@@ -1363,18 +1363,18 @@ var
 
     sfrom := Trim(sfrom);
     if sfrom = '' then
-      exit;
+      Exit;
 
     if sfrom[1] = ':' then
       Delete(sfrom, 1, 1);
     if sfrom = '' then
-      exit;
+      Exit;
 
     if sfrom[1] = '=' then
       Delete(sfrom, 1, 1);
     sfrom := Trim(sfrom);
     if sfrom = '' then
-      exit;
+      Exit;
 
     if not isidentifier(sfrom) then
       Exit;
@@ -1601,7 +1601,7 @@ begin
       end;
       resolve_for;
       if stmp = 'while 1 do' then
-        stmp := 'while true do';
+        stmp := 'while True do';
     end;
 
     for j := 1 to nspaces do
@@ -1610,20 +1610,20 @@ begin
     s2.Add(stmp);
   end;
 
-  result := s2.Text;
+  Result := s2.Text;
   s.Free;
   s2.Free;
 end;
 
 function ConvertNaive(const sinp: string): string;
 begin
-  result := ConvertNaive_Pass1(sinp);
-  result := ConvertNaive_Pass2(result);
-  result := ConvertNaive_Pass3(result);
-  result := ConvertNaive_Pass4(result);
-  result := ConvertNaive_Pass5(result);
-  result := ConvertNaive_Pass6(result);
-  result := ConvertNaive_Pass7(result);
+  Result := ConvertNaive_Pass1(sinp);
+  Result := ConvertNaive_Pass2(Result);
+  Result := ConvertNaive_Pass3(Result);
+  Result := ConvertNaive_Pass4(Result);
+  Result := ConvertNaive_Pass5(Result);
+  Result := ConvertNaive_Pass6(Result);
+  Result := ConvertNaive_Pass7(Result);
 end;
 
 
