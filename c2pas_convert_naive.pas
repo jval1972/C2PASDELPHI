@@ -1402,7 +1402,7 @@ var
     if pp1 > 0 then
       splitstring(s2, ftmp, ftmp2, '<')
     else if pp2 > 0 then
-      splitstring(s2, ftmp, ftmp2, '<')
+      splitstring(s2, ftmp, ftmp2, '>')
     else
       splitstring(s2, ftmp, ftmp2, '=');
 
