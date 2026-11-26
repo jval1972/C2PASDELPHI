@@ -131,12 +131,101 @@ end;
 
 function DecodeStrings(const inp: string): string;
 var
-  i: Integer;
+  i, j, len: Integer;
+  stmp, stmp2: string;
+  q, q2: string;
+  skip, skip1, skip2: boolean;
 begin
   Result := inp;
   for i := 0 to cnv_strings.Count - 1 do
   begin
-    Result := StringReplace(Result, cnv_strings.Strings[i], '''' + (cnv_strings.Objects[i] as TStringObject).str + '''', [rfReplaceAll, rfIgnoreCase]);
+    stmp := (cnv_strings.Objects[i] as TStringObject).str;
+
+    stmp2 := '';
+    len := Length(stmp);
+    skip := False;
+    skip1 := False;
+    skip2 := False;
+    for j := 1 to len do
+    begin
+      if skip then
+      begin
+        skip := False;
+        Continue;
+      end;
+      if stmp[j] = '''' then
+      begin
+        if j = 1 then
+        begin
+          q := '';
+          skip1 := True;
+        end
+        else
+          q := '''';
+        if j = len then
+        begin
+          skip2 := True;
+          q2 := ''
+        end
+        else
+          q2 := '''';
+        stmp2 := stmp2 + q + '$27' + q2;
+        Continue;
+      end
+      else if (stmp[j] = '\') and (j < len) then
+      begin
+        if j = 1 then
+          q := ''
+        else
+          q := '''';
+        if j = len - 1 then
+          q2 := ''
+        else
+          q2 := '''';
+        skip := True;
+        if stmp[j + 1] = 'a' then
+          stmp2 := stmp2 + q + '#7' + q2
+        else if stmp[j + 1] = 'b' then
+          stmp2 := stmp2 + q + '#8' + q2
+        else if stmp[j + 1] = 'e' then
+          stmp2 := stmp2 + q + '$1B' + q2
+        else if stmp[j + 1] = 'e' then
+          stmp2 := stmp2 + q + '$C' + q2
+        else if stmp[j + 1] = 'n' then
+          stmp2 := stmp2 + q + '#10' + q2
+        else if stmp[j + 1] = 'r' then
+          stmp2 := stmp2 + q + '#13' + q2
+        else if stmp[j + 1] = 't' then
+          stmp2 := stmp2 + q + '#9' + q2
+        else if stmp[j + 1] = 'v' then
+          stmp2 := stmp2 + q + '$B' + q2
+        else if stmp[j + 1] = '\' then
+          stmp2 := stmp2 + '\'
+        else if stmp[j + 1] = '''' then
+          stmp2 := stmp2 + q + '$27' + q2
+        else if stmp[j + 1] = '"' then
+          stmp2 := stmp2 + '"'
+        else if stmp[j + 1] = '?' then
+          stmp2 := stmp2 + '?'
+        else
+        begin
+          stmp2 := stmp2 + '\';
+          skip := False;
+        end;
+        if skip then
+          Continue;
+      end
+      else
+        stmp2 := stmp2 + stmp[j];
+      if j = 1 then
+        stmp2 := '''' + stmp2
+      else if j = len then
+        stmp2 := stmp2 + '''';
+    end;
+
+    stmp2 := StringReplace(stmp2, '''''', '', [rfReplaceAll, rfIgnoreCase]);
+
+    Result := StringReplace(Result, cnv_strings.Strings[i], stmp2, [rfReplaceAll, rfIgnoreCase]);
     (cnv_strings.Objects[i] as TStringObject).Free;
   end;
   cnv_strings.Free;
@@ -425,6 +514,19 @@ begin
   if CountChr(stmp, '''') = 2 then
     if stmp[1] = '''' then
       if stmp[Length(stmp)] = '''' then
+        Result := True;
+end;
+
+function isinCquote(const stmp1: string): boolean;
+var
+  stmp: string;
+begin
+  stmp := Trim(stmp1);
+  Result := False;
+
+  if CountChr(stmp, '"') = 2 then
+    if stmp[1] = '"' then
+      if stmp[Length(stmp)] = '"' then
         Result := True;
 end;
 
