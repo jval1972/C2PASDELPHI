@@ -192,6 +192,12 @@ begin
   scomment := '';
 end;
 
+procedure joincomment(var sin: string; const scomment: string);
+begin
+  if scomment <> '' then
+    sin := sin + ' ' + scomment;
+end;
+
 function isCtypename(const s: string): boolean;
 var
   s1: string;
@@ -511,11 +517,96 @@ begin
           end;
         end;
 
-      s2.Add(s.Strings[i]);
+    s2.Add(s.Strings[i]);
   end;
 
   s.Free;
   Result := s2.Text;
+  s2.Free;
+end;
+
+function ResolveSingleElseIfs(const sinp: string): string;
+var
+  s, s2: TStringList;
+  i, j, p: Integer;
+  stmp1, stmp2, stmp3: string;
+  scomment1, scomment2: string;
+  nspaces, nspaces2: Integer;
+begin
+  s := TStringList.Create;
+  s.Text := sinp;
+  s2 := TStringList.Create;
+
+  for i := 0 to s.Count - 1 do
+  begin
+    stmp1 := s.Strings[i];
+    nspaces := 0;
+    for j := 1 to Length(stmp1) do
+    begin
+      if stmp1[j] = ' ' then
+        Inc(nspaces)
+      else
+        Break;
+    end;
+
+    stmp1 := Trim(stmp1);
+
+    if (i < s.Count - 3) and ((Pos('if ', stmp1) = 1) or (Pos('else if ', stmp1) = 1) or (Pos('if(', stmp1) = 1) or (Pos('else if(', stmp1) = 1)) then
+      if (Pos('{', stmp1) = 0) and (Pos('}', stmp1) = 0) then
+      begin
+        stmp2 := s.Strings[i + 1];
+        nspaces2 := 0;
+        for j := 1 to Length(stmp2) do
+        begin
+          if stmp2[j] = ' ' then
+            Inc(nspaces2)
+          else
+            Break;
+        end;
+        stmp2 := Trim(stmp2);
+        if (Pos('{', stmp2) = 0) and (Pos('}', stmp2) = 0) and (Pos('else', stmp2) = 0) then
+        begin
+          stmp3 := Trim(s.Strings[i + 2]);
+          if (Pos('else if ', stmp3) = 1) or (Pos('else if(', stmp3) = 1) or (Pos('else ', stmp3) = 1) or (Pos('else(', stmp3) = 1) then
+          begin
+            splitcomment(stmp2, scomment2);
+            stmp2 := Trim(stmp2);
+            if Pos(';', stmp2) = Length(stmp2) then
+            begin
+              splitcomment(stmp1, scomment1);
+              stmp1 := stmp1 + ' {';
+              joincomment(stmp1, scomment1);
+              stmp2 := stmp2 + #255;
+              joincomment(stmp2, scomment2);
+              for j := 1 to nspaces2 do
+                stmp2 := ' ' + stmp2;
+              s.Strings[i + 1] := stmp2;
+            end;
+          end;
+        end;
+      end;
+
+    for j := 1 to nspaces do
+      stmp1 := ' ' + stmp1;
+    s2.Add(stmp1);
+  end;
+
+  s.Clear;
+  for i := 0 to s2.Count - 1 do
+  begin
+    stmp1 := s2.Strings[i];
+    p := Pos(#255, stmp1);
+    if p > 0 then
+    begin
+      Delete(stmp1, p, 1);
+      s.Add(stmp1);
+      s.Add('}');
+    end
+    else
+      s.Add(stmp1);
+  end;
+  Result := s.Text;
+  s.Free;
   s2.Free;
 end;
 
@@ -526,8 +617,9 @@ begin
 
   Result := StringReplace(Result, #13#10, #10, [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, #10, #13#10, [rfReplaceAll, rfIgnoreCase]);
-  Result := replace_else(Result);
   Result := StringReplace(Result, #9, '  ', [rfReplaceAll, rfIgnoreCase]);
+  Result := replace_else(Result);
+  Result := ResolveSingleElseIfs(Result);
   Result := StringReplace(Result, '=&', '=@', [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, '= &', '= @', [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, '=  &', '= @', [rfReplaceAll, rfIgnoreCase]);
@@ -841,7 +933,7 @@ begin
         end;
       end;
 
-      stmp := stmp + ' ' + scomment;
+      joincomment(stmp, scomment);
 
       stmp := Trim(stmp);
 
@@ -872,7 +964,7 @@ function ConvertNaive_Pass3(const sinp: string): string;
 var
   s: TStringList;
   i, j: integer;
-  stmp, stmpc, scomment: string;
+  stmp, scomment: string;
   s1, s2, s3: string;
   nspaces: integer;
   changed: boolean;
@@ -1245,8 +1337,7 @@ begin
             changed := True;
           end;
 
-      if scomment <> '' then
-        stmp := stmp + ' ' + scomment;
+      joincomment(stmp, scomment);
     end
     else if Pos('void ', stmp) = 1 then
     begin
@@ -1956,8 +2047,7 @@ begin
       resolve_for;
       if stmp = 'while 1 do' then
         stmp := 'while True do';
-      if scomment <> '' then
-        stmp := stmp + ' ' + scomment;
+      joincomment(stmp, scomment);
     end;
 
     for j := 1 to nspaces do
@@ -2375,8 +2465,7 @@ begin
                   if stmp2 <> '' then
                   begin
                     stmp := stmp + 'if ' + stmp2 + ' then';
-                    if scomment <> '' then
-                      stmp := stmp + ' ' + scomment;
+                    joincomment(stmp, scomment);
                     s2.Add(stmp);
 
                     stmp := '';
@@ -2504,7 +2593,7 @@ function ConvertNaive_Pass9(const sinp: string): string;
 var
   s, s2: TStringList;
   i, j: integer;
-  stmp, stmp1, stmp2, stmp3, stmp4, scomment: string;
+  stmp, stmp1, stmp2, stmp3, scomment: string;
   nspaces: integer;
   changed: boolean;
 begin
