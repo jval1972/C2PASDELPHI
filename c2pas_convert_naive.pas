@@ -314,12 +314,60 @@ begin
         Result := True;
 end;
 
+function replace_else(const sinp: string): string;
+var
+  s1, s2: string;
+  i, j: Integer;
+begin
+  Result := sinp;
+
+  for i := 10 downto 0 do
+  begin
+    s1 := #13#10;
+    for j := 0 to i do
+      s1 := s1 + #9;
+    s1 := s1 + '} else ';
+
+    s2 := #13#10;
+    for j := 0 to i do
+      s2 := s2 + '  ';
+    s2 := s2 + 'end';
+    s2 := s2 + #13#10;
+    for j := 0 to i do
+      s2 := s2 + '  ';
+    s2 := s2 + 'else ';
+
+    Result := StringReplace(Result, s1, s2, [rfReplaceAll, rfIgnoreCase]);
+  end;
+
+  for i := 20 downto 0 do
+  begin
+    s1 := #13#10;
+    for j := 0 to i do
+      s1 := s1 + ' ';
+    s1 := s1 + '} else ';
+
+    s2 := #13#10;
+    for j := 0 to i do
+      s2 := s2 + ' ';
+    s2 := s2 + 'end';
+    s2 := s2 + #13#10;
+    for j := 0 to i do
+      s2 := s2 + ' ';
+    s2 := s2 + 'else ';
+
+    Result := StringReplace(Result, s1, s2, [rfReplaceAll, rfIgnoreCase]);
+  end;
+
+end;
+
 function ConvertNaive_Pass1(const sinp: string): string;
 begin
   Result := sinp;
 
   Result := StringReplace(Result, #13#10, #10, [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, #10, #13#10, [rfReplaceAll, rfIgnoreCase]);
+  Result := replace_else(Result);
   Result := StringReplace(Result, #9, '  ', [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, '=&', '=@', [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, '= &', '= @', [rfReplaceAll, rfIgnoreCase]);
