@@ -1786,6 +1786,38 @@ begin
     if odd(nspaces) then
       Dec(nspaces);
 
+    if (stmp = 'end') or (stmp = 'end;') then
+    begin
+      if s2.Count > 0 then
+      begin
+        stmp1 := Trim(s2.Strings[s2.Count - 1]);
+        if Pos('return ', stmp1) = 1 then
+          if (CountChr(stmp1, ';') = 1) and (CountChr(stmp1, '=') = 0) then
+            if stmp1[Length(stmp1)] = ';' then
+            begin
+              stmp1[1] := ' ';
+              stmp1[2] := ' ';
+              stmp1[3] := ' ';
+              stmp1[4] := ' ';
+              stmp1[5] := ' ';
+              stmp1[6] := ' ';
+              stmp1 := 'Result := ' + Trim(stmp1);
+              for j := 1 to nspaces + 2 do
+                stmp1 := ' ' + stmp1;
+              s2.Strings[s2.Count - 1] := stmp1;
+              stmp1 := 'Exit;';
+              for j := 1 to nspaces + 2 do
+                stmp1 := ' ' + stmp1;
+              s2.Add(stmp1);
+            end;
+      end;
+      for j := 1 to nspaces do
+        stmp := ' ' + stmp;
+      s2.Add(stmp);
+      Continue;
+    end;
+
+
     changed := False;
 
     if Pos('default:', stmp) = 1 then
