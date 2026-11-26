@@ -1977,6 +1977,85 @@ begin
       stmp := stmp0;
     end;
 
+    if Pos('&', stmp) > 0 then
+    begin
+      stmp0 := ' &:=  not ';
+      p1 := Pos(stmp0, stmp);
+      if p1 <= 0 then
+      begin
+        stmp0 := ' &:= not ';
+        p1 := Pos(stmp0, stmp);
+      end;
+
+      if p1 > 0 then
+      begin
+        stmp1 := '';
+        for j := 1 to p1 - 1 do
+          stmp1 := stmp1 + stmp[j];
+
+        stmp2 := '';
+        for j := p1 + Length(stmp0) to Length(stmp) do
+        begin
+          stmp2 := stmp2 + stmp[j];
+        end;
+
+        stmp1 := Trim(stmp1);
+        stmp2 := Trim(stmp2);
+        splitcomment(stmp2, scomment);
+        stmp2 := Trim(stmp2);
+
+        s3 := string2stringlist(stmp1, ' ');
+        removeblanclines(s3);
+
+        sfront := '';
+
+        idx := s3.IndexOf('static');
+        if idx = 0 then
+        begin
+          s3.Delete(0);
+          sfront := sfront + ' static';
+        end;
+
+        idx := s3.IndexOf('const');
+        if idx = 0 then
+        begin
+          s3.Delete(0);
+          sfront := sfront + ' const';
+        end;
+
+        if s3.Count > 1 then
+          if isCtypename(s3.Strings[0]) or isPastypename(s3.Strings[0]) or issingleidentifier(s3.Strings[0]) then
+          begin
+            sfront := sfront + ' ' + s3.Strings[0];
+            s3.Delete(0);
+          end;
+
+        if s3.Count = 1 then
+          stmp1 := s3.Strings[0];
+
+        if (s3.Count = 1) and (Pos(';', stmp2) = Length(stmp2)) then
+          if issingleidentifier(stmp1) or isidentifier(stmp1) or isstructintidentifier(stmp1) or isintidentifier(stmp1) or isinsingleparenthesis(stmp1) then
+          begin
+            stmp0 := '';
+            for j := 1 to nspaces do
+              stmp0 := stmp0 + ' ';
+
+            if sfront <> '' then
+              sfront := Trim(sfront) + ' ';
+
+            stmp0 := stmp0 + sfront + stmp1 + ' := ' + stmp1 + ' and not ' + stmp2;
+
+            s2.Add(stmp0);
+
+            s3.Free;
+            Continue;
+          end;
+
+        s3.Free;
+      end;
+    end;
+
+
     stmp := Trim(stmp);
     for j := 1 to nspaces do
       stmp := ' ' + stmp;
