@@ -545,6 +545,7 @@ begin
   Result := StringReplace(Result, '(0x', '($', [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, '[0x', '[$', [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, ',0x', ',$', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '~0x', '~$', [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, '#endif', '{$ENDIF}', [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, '#else', '{$ELSE}', [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, #254#250, '|:=', [rfReplaceAll, rfIgnoreCase]);
