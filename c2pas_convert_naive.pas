@@ -34,6 +34,113 @@ implementation
 uses
   SysUtils, Classes, StrUtils, c2pas_memmgr, c2pas_utils;
 
+var
+  cnv_strings: TStringList;
+
+type
+  TStringObject = class(TObject)
+    str: string;
+    constructor Create(const astr: string); virtual;
+  end;
+
+constructor TStringObject.Create(const astr: string);
+begin
+  str := astr;
+  Inherited Create;
+end;
+
+const
+  STR_PREFIX = '___STR_VARIABLE___';
+
+function EncodeStrings(const inp: string): string;
+var
+  i: Integer;
+  cnt: Integer;
+  incomment: boolean;
+  inlinecomment: boolean;
+  instring: boolean;
+  stoken: string;
+
+  function _add_string: string;
+  begin
+    if stoken = '' then
+      Exit;
+
+    Inc(cnt);
+    Result := '(' + STR_PREFIX + IntToStr(cnt) + ')';
+    cnv_strings.AddObject(Result, TStringObject.Create(stoken));
+    stoken := '';
+  end;
+
+begin
+  cnv_strings := TStringList.Create;
+
+  cnt := 0;
+  Result := '';
+  incomment := False;
+  inlinecomment := False;
+  instring := False;
+  stoken := '';
+
+  for i := 1 to Length(inp) - 1 do
+  begin
+    if inp[i] = '"' then
+    begin
+      if not (incomment or inlinecomment) then
+      begin
+        instring := not instring;
+        if not instring then
+          Result := Result + _add_string;
+      end
+      else
+        Result := Result + '"';
+    end
+    else if inp[i] = #13 then
+    begin
+      if instring then
+      begin
+        instring := False;
+        Result := Result + _add_string;
+      end
+      else if inlinecomment then
+        inlinecomment := False;
+      Result := Result + #13;
+    end
+    else if (inp[i] = '/') and (inp[i + 1] = '/') and not instring then
+    begin
+      inlinecomment := True;
+      Result := Result + '/';
+    end
+    else if (inp[i] = '/') and (inp[i + 1] = '*') and not instring then
+    begin
+      incomment := True;
+      Result := Result + '/';
+    end
+    else if (inp[i] = '*') and (inp[i + 1] = '/') and not instring then
+    begin
+      incomment := False;
+      Result := Result + '*';
+    end
+    else if instring then
+      stoken := stoken + inp[i]
+    else
+      Result := Result + inp[i];
+  end;
+end;
+
+function DecodeStrings(const inp: string): string;
+var
+  i: Integer;
+begin
+  Result := inp;
+  for i := 0 to cnv_strings.Count - 1 do
+  begin
+    Result := StringReplace(Result, cnv_strings.Strings[i], '''' + (cnv_strings.Objects[i] as TStringObject).str + '''', [rfReplaceAll, rfIgnoreCase]);
+    (cnv_strings.Objects[i] as TStringObject).Free;
+  end;
+  cnv_strings.Free;
+end;
+
 procedure splitcomment(var sin: string; out scomment: string);
 var
   p1, p2: integer;
@@ -363,7 +470,7 @@ end;
 
 function ConvertNaive_Pass1(const sinp: string): string;
 begin
-  Result := sinp;
+  Result := EncodeStrings(sinp);
 
   Result := StringReplace(Result, #13#10, #10, [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, #10, #13#10, [rfReplaceAll, rfIgnoreCase]);
@@ -1797,7 +1904,7 @@ begin
   s := TStringList.Create;
   s2 := TStringList.Create;
 
-  s.Text := sinp;
+  s.Text := DecodeStrings(sinp);
 
   for i := 0 to s.Count - 1 do
   begin
