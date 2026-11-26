@@ -445,6 +445,9 @@ begin
   Result := StringReplace(Result, #254#252, '&:=', [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, #254#253, '>>:=', [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, #254#254, '<<:=', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, ' true;', ' True;', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, ' false;', ' False;', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, ' continue;', ' Continue;', [rfReplaceAll, rfIgnoreCase]);
 end;
 
 function ConvertNaive_Pass2(const sinp: string): string;
