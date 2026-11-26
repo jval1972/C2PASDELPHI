@@ -1757,6 +1757,9 @@ begin
 
     if stmp = ';' then
     begin
+      if s2.Count > 0 then
+        if s2.Strings[s2.Count - 1] = '' then
+          Continue;
       s2.Add('');
       Continue;
     end;
