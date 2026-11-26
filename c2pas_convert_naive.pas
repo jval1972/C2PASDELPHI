@@ -51,6 +51,7 @@ end;
 
 const
   STR_PREFIX = '___STR_VARIABLE___';
+  STR_SKIP = '$SKIP_THIS_LINE';
 
 function EncodeStrings(const inp: string): string;
 var
@@ -468,9 +469,60 @@ begin
 
 end;
 
+function MakeBrackets(const sinp: string): string;
+var
+  s, s2: TStringList;
+  stmp, stmp2: string;
+  i, p: Integer;
+begin
+  s := TStringList.Create;
+  s.Text := sinp;
+  s2 := TStringList.Create;
+
+  for i := 0 to s.Count - 1 do
+  begin
+    stmp := Trim(s.Strings[i]);
+
+    if stmp = STR_SKIP then
+      Continue;
+
+    if i < s.Count - 1 then
+      if (Pos('if ', stmp) = 1) or (Pos('for ', stmp) = 1) then
+        if Pos('{', stmp) <= 0 then
+        begin
+          stmp2 := Trim(s.Strings[i + 1]);
+          if stmp2 = '{' then
+          begin
+            s2.Add(s.Strings[i] + ' {');
+            s.Strings[i + 1] := STR_SKIP;
+            Continue;
+          end;
+          if Pos('{', stmp2) = 1 then
+          begin
+            p := Pos('{', s.Strings[i + 1]);
+            if p > 0 then
+            begin
+              stmp2 := s.Strings[i + 1];
+              Delete(stmp2, p, 1);
+              s.Strings[i + 1] := stmp2;
+            end;
+            s2.Add(s.Strings[i] + ' {');
+            Continue;
+          end;
+        end;
+
+      s2.Add(s.Strings[i]);
+  end;
+
+  s.Free;
+  Result := s2.Text;
+  s2.Free;
+end;
+
 function ConvertNaive_Pass1(const sinp: string): string;
 begin
   Result := EncodeStrings(sinp);
+  Result := MakeBrackets(Result);
 
   Result := StringReplace(Result, #13#10, #10, [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, #10, #13#10, [rfReplaceAll, rfIgnoreCase]);
@@ -730,7 +782,7 @@ var
     stmp2 := stmp;
 
     for ii := i + 1 to endpos do
-      s.Strings[ii] := '$SKIP_THIS_LINE';
+      s.Strings[ii] := STR_SKIP;
 
     a_items.Free;
   end;
@@ -744,7 +796,7 @@ begin
   for i := 0 to s.Count - 1 do
   begin
     stmp := s.Strings[i];
-    if stmp = '$SKIP_THIS_LINE' then
+    if stmp = STR_SKIP then
       Continue;
 
     nspaces := 0;
@@ -820,7 +872,7 @@ function ConvertNaive_Pass3(const sinp: string): string;
 var
   s: TStringList;
   i, j: integer;
-  stmp: string;
+  stmp, stmpc, scomment: string;
   s1, s2, s3: string;
   nspaces: integer;
   changed: boolean;
@@ -1173,6 +1225,9 @@ begin
         begin
           s.Strings[i - 1] := stringofchar(' ', nspaces) + 'end';
         end;
+
+      splitcomment(stmp, scomment);
+      stmp := Trim(stmp);
       if stmp[length(stmp)] = ')' then
         if i < s.Count - 1 then
           if Trim(s.Strings[i + 1]) = 'begin' then
@@ -1189,6 +1244,9 @@ begin
               stmp := ' ' + stmp;
             changed := True;
           end;
+
+      if scomment <> '' then
+        stmp := stmp + ' ' + scomment;
     end
     else if Pos('void ', stmp) = 1 then
     begin
@@ -1461,7 +1519,7 @@ function ConvertNaive_Pass7(const sinp: string): string;
 var
   s, s2: TStringList;
   i, j: integer;
-  stmp, token, rest: string;
+  stmp, token, rest, scomment: string;
   p1, p2, p3, start: integer;
   nspaces: integer;
 
@@ -1559,6 +1617,7 @@ var
     sdiv: Char;
     scounter, sfrom, sdir, sto: string;
     ii, cnt1, cnt2: integer;
+    okdo: Boolean;
   begin
     first := firstword(stmp);
     if first <> 'for' then
@@ -1566,7 +1625,23 @@ var
 
     last := lastword(stmp);
     if last <> 'do' then
-      Exit;
+    begin
+      okdo := False;
+      if Pos('for ', stmp) = 1 then
+        if Pos(' do', stmp) = 0 then
+          if i < s.Count - 1 then
+          begin
+            ftmp4 := Trim(s.Strings[i + 1]);
+            if (Pos('if ', ftmp4) = 1) or (Pos('for ', ftmp4) = 1) then
+            begin
+              stmp := stmp + ' do';
+              okdo := True;
+            end;
+          end;
+
+      if not okdo then
+        Exit;
+    end;
 
     sfor := Copy(stmp, 4, Length(stmp) - 6);
     sfor := Trim(sfor);
@@ -1877,9 +1952,12 @@ begin
       while resolve_pointers2 do
       begin
       end;
+      splitcomment(stmp, scomment);
       resolve_for;
       if stmp = 'while 1 do' then
         stmp := 'while True do';
+      if scomment <> '' then
+        stmp := stmp + ' ' + scomment;
     end;
 
     for j := 1 to nspaces do
@@ -2426,7 +2504,7 @@ function ConvertNaive_Pass9(const sinp: string): string;
 var
   s, s2: TStringList;
   i, j: integer;
-  stmp, stmp1, stmp2, stmp3, scomment: string;
+  stmp, stmp1, stmp2, stmp3, stmp4, scomment: string;
   nspaces: integer;
   changed: boolean;
 begin
@@ -2438,7 +2516,7 @@ begin
   for i := 0 to s.Count - 1 do
   begin
     stmp := s.Strings[i];
-    if stmp = '$SKIP_THIS_LINE' then
+    if stmp = STR_SKIP then
       Continue;
 
     nspaces := 0;
@@ -2473,8 +2551,8 @@ begin
             if stmp2 = 'end' then
               SetLength(stmp1, Length(stmp1) - 1);
             stmp := stmp1 + ' ' + scomment;
-            s.Strings[i + 1] := '$SKIP_THIS_LINE';
-            s.Strings[i + 2] := '$SKIP_THIS_LINE';
+            s.Strings[i + 1] := STR_SKIP;
+            s.Strings[i + 2] := STR_SKIP;
             nspaces := nspaces + 2;
             changed := True;
           end;
@@ -2488,7 +2566,7 @@ begin
           stmp2 := Trim(s.Strings[i + 2]);
           if (stmp2 = 'else') or (Pos('else if ', stmp2) = 1) then
           begin
-            s.Strings[i + 1] := '$SKIP_THIS_LINE';
+            s.Strings[i + 1] := STR_SKIP;
             Continue;
           end;
         end;
