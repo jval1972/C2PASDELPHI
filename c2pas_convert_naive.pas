@@ -2214,6 +2214,91 @@ begin
   s2.Free;
 end;
 
+function ConvertNaive_Pass9(const sinp: string): string;
+var
+  s, s2: TStringList;
+  i, j: integer;
+  stmp, stmp1, stmp2, stmp3, scomment: string;
+  nspaces: integer;
+  changed: boolean;
+begin
+  s := TStringList.Create;
+  s2 := TStringList.Create;
+
+  s.Text := sinp;
+
+  for i := 0 to s.Count - 1 do
+  begin
+    stmp := s.Strings[i];
+    if stmp = '$SKIP_THIS_LINE' then
+      Continue;
+
+    nspaces := 0;
+    for j := 1 to length(stmp) do
+    begin
+      if stmp[j] = ' ' then
+        inc(nspaces)
+      else
+        break;
+    end;
+    stmp := Trim(stmp);
+
+    changed := False;
+
+    if (stmp = 'begin') and (i < s.Count - 3) and (s2.Count > 0) then
+    begin
+      stmp3 := Trim(s2.Strings[s2.Count - 1]);
+      splitcomment(stmp3, scomment);
+      stmp3 := Trim(stmp3);
+      if ((Pos('if ', stmp3) = 1) and (Pos(' then', stmp3) = Length(stmp3) - 4)) or
+         ((Pos('for ', stmp3) = 1) and (Pos(' do', stmp3) = Length(stmp3) - 2)) or
+         ((stmp3 = 'else') or (Pos('else if ', stmp3) = 1)) then
+      begin
+        stmp1 := Trim(s.Strings[i + 1]);
+        splitcomment(stmp1, scomment);
+        stmp1 := Trim(stmp1);
+        if (CountChr(stmp1, ';') = 1) and (Pos(';', stmp1) = Length(stmp1)) and (Pos('return ', stmp1) = 0) then
+        begin
+          stmp2 := Trim(s.Strings[i + 2]);
+          if ((stmp2 = 'end') or (stmp2 = 'end;')) and (Length(stmp1) >= 2) then
+          begin
+            if stmp2 = 'end' then
+              SetLength(stmp1, Length(stmp1) - 1);
+            stmp := stmp1 + ' ' + scomment;
+            s.Strings[i + 1] := '$SKIP_THIS_LINE';
+            s.Strings[i + 2] := '$SKIP_THIS_LINE';
+            nspaces := nspaces + 2;
+            changed := True;
+          end;
+        end;
+      end;
+      if not changed then
+      begin
+        stmp1 := Trim(s.Strings[i + 1]);
+        if (stmp1 = 'end') or (stmp1 = 'end;') then
+        begin
+          stmp2 := Trim(s.Strings[i + 2]);
+          if (stmp2 = 'else') or (Pos('else if ', stmp2) = 1) then
+          begin
+            s.Strings[i + 1] := '$SKIP_THIS_LINE';
+            Continue;
+          end;
+        end;
+      end;
+    end;
+
+    stmp := Trim(stmp);
+    for j := 1 to nspaces do
+      stmp := ' ' + stmp;
+
+    s2.Add(stmp);
+  end;
+
+  Result := s2.Text;
+  s.Free;
+  s2.Free;
+end;
+
 function ConvertNaive(const sinp: string): string;
 begin
   Result := ConvertNaive_Pass1(sinp);
@@ -2224,6 +2309,7 @@ begin
   Result := ConvertNaive_Pass6(Result);
   Result := ConvertNaive_Pass7(Result);
   Result := ConvertNaive_Pass8(Result);
+  Result := ConvertNaive_Pass9(Result);
 end;
 
 
