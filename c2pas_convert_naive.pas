@@ -269,13 +269,13 @@ begin
 
   if stmp[1] = '$' then
   begin
-    if Length(stmp) < 2 then
-      Exit;
-    start := 2;
+    Result := IsInteger(stmp);
+    Exit;
   end
   else if (stmp[1] = '-') and (Length(stmp) >= 2) and (stmp[2] in ['1'..'9', '0']) then
   begin
-    start := 2;
+    Result := IsNumeric(stmp);
+    Exit;
   end
   else
     start := 1;
@@ -358,7 +358,7 @@ begin
   Result := True;
 end;
 
-function isstructintidentifier(const stmp1: string): boolean;
+function isstructidentifier(const stmp1: string): boolean;
 var
   i: integer;
   stmp: string;
@@ -1892,6 +1892,102 @@ begin
   s2.Free;
 end;
 
+function _line_fix_if_then_1(const line: string): string;
+var
+  sl: TStringList;
+  i: Integer;
+  stmp, scomment: string;
+begin
+  Result := line;
+
+  if Pos('if ', line) = 0 then // Trimmed string
+    if Pos('else if ', line) = 0 then // Trimmed string
+      Exit;
+
+  stmp := line;
+
+  for i := 0 to Length(stmp) do
+    if stmp[i] in ['(', ')'] then
+      stmp[i] := ' ';
+
+  splitcomment(stmp, scomment);
+
+  sl := string2stringlist(stmp, ' ');
+  removeblanclines(sl);
+
+  if (sl.Count = 7) and (Pos('if ', stmp) = 1) then
+    if (sl.strings[2] = 'and') and ((sl.strings[4] = '=') or (sl.strings[4] = '<>')) and (sl.strings[6] = 'then') then
+      if isidentifier(sl.Strings[1]) or issingleidentifier(sl.Strings[1]) or isstructidentifier(sl.Strings[1]) then
+        if isidentifier(sl.Strings[3]) or issingleidentifier(sl.Strings[3]) or isstructidentifier(sl.Strings[3]) then
+          if isidentifier(sl.Strings[5]) or issingleidentifier(sl.Strings[5]) or isstructidentifier(sl.Strings[5]) then
+          begin
+            Result := 'if ' + sl.Strings[1] + ' and ' + sl.Strings[3] + ' ' + sl.strings[4] + ' ' + sl.Strings[5] + ' then';
+            if scomment <> '' then
+            begin
+              Result := Result + ' ';
+              if Odd(Length(Result)) then
+                Result := Result + ' ';
+                Result := Result + scomment;
+            end;
+            sl.Free;
+            Exit;
+          end;
+
+  if (sl.Count = 5) and (Pos('if ', stmp) = 1)  then
+    if (sl.strings[2] = 'and') and (sl.strings[4] = 'then') then
+      if isidentifier(sl.Strings[1]) or issingleidentifier(sl.Strings[1]) or isstructidentifier(sl.Strings[1]) then
+        if isidentifier(sl.Strings[3]) or issingleidentifier(sl.Strings[3]) or isstructidentifier(sl.Strings[3]) then
+        begin
+          Result := 'if ' + sl.Strings[1] + ' and ' + sl.Strings[3] + ' <> 0 then';
+          if scomment <> '' then
+          begin
+            Result := Result + ' ';
+            if Odd(Length(Result)) then
+              Result := Result + ' ';
+              Result := Result + scomment;
+          end;
+          sl.Free;
+          Exit;
+        end;
+
+  if (sl.Count = 8) and (Pos('else if ', stmp) = 1) then
+    if (sl.strings[3] = 'and') and ((sl.strings[5] = '=') or (sl.strings[5] = '<>')) and (sl.strings[7] = 'then') then
+      if isidentifier(sl.Strings[2]) or issingleidentifier(sl.Strings[2]) or isstructidentifier(sl.Strings[2]) then
+        if isidentifier(sl.Strings[4]) or issingleidentifier(sl.Strings[4]) or isstructidentifier(sl.Strings[4]) then
+          if isidentifier(sl.Strings[6]) or issingleidentifier(sl.Strings[6]) or isstructidentifier(sl.Strings[6]) then
+          begin
+            Result := 'else if ' + sl.Strings[2] + ' and ' + sl.Strings[4] + ' ' + sl.strings[5] + ' ' + sl.Strings[6] + ' then';
+            if scomment <> '' then
+            begin
+              Result := Result + ' ';
+              if Odd(Length(Result)) then
+                Result := Result + ' ';
+                Result := Result + scomment;
+            end;
+            sl.Free;
+            Exit;
+          end;
+
+  if (sl.Count = 6) and (Pos('else if ', stmp) = 1)  then
+    if (sl.strings[3] = 'and') and (sl.strings[5] = 'then') then
+      if isidentifier(sl.Strings[2]) or issingleidentifier(sl.Strings[2]) or isstructidentifier(sl.Strings[2]) then
+        if isidentifier(sl.Strings[4]) or issingleidentifier(sl.Strings[4]) or isstructidentifier(sl.Strings[4]) then
+        begin
+          Result := 'else if ' + sl.Strings[2] + ' and ' + sl.Strings[4] + ' <> 0 then';
+          if scomment <> '' then
+          begin
+            Result := Result + ' ';
+            if Odd(Length(Result)) then
+              Result := Result + ' ';
+              Result := Result + scomment;
+          end;
+          sl.Free;
+          Exit;
+        end;
+
+  sl.Free;
+end;
+
 function ConvertNaive_Pass8(const sinp: string): string;
 var
   s, s2, s3: TStringList;
@@ -1936,6 +2032,8 @@ begin
       Continue;
     end;
 
+    stmp := Trim(_line_fix_if_then_1(stmp));
+    
     if i > 0 then
     begin
       stmp2 := s.Strings[i - 1];
@@ -2175,7 +2273,7 @@ begin
                 if s3.Count = 1 then
                   stmp1 := s3.Strings[0];
 
-                if (s3.Count = 1) and (isstructintidentifier(stmp1) or issingleidentifier(stmp1)) and
+                if (s3.Count = 1) and (isstructidentifier(stmp1) or issingleidentifier(stmp1)) and
                   (stmp2 <> '') and
 //                  isinsingleparenthesis(stmp2) and
                   (stmp3 <> '') and
@@ -2289,7 +2387,7 @@ begin
           stmp1 := s3.Strings[0];
 
         if (s3.Count = 1) and (Pos(';', stmp2) = Length(stmp2)) then
-          if issingleidentifier(stmp1) or isidentifier(stmp1) or isstructintidentifier(stmp1) or isintidentifier(stmp1) or isinsingleparenthesis(stmp1) then
+          if issingleidentifier(stmp1) or isidentifier(stmp1) or isstructidentifier(stmp1) or isintidentifier(stmp1) or isinsingleparenthesis(stmp1) then
           begin
             stmp0 := '';
             for j := 1 to nspaces do

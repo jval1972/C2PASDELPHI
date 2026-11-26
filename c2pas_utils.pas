@@ -290,6 +290,7 @@ var
   code: integer;
   v: double;
 begin
+  DecimalSeparator := '.';
   Val(s, v, code);
   Result := code = 0;
 end;
