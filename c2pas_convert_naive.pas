@@ -301,6 +301,19 @@ begin
           Result := True;
 end;
 
+function isinpascalquote(const stmp1: string): boolean;
+var
+  stmp: string;
+begin
+  stmp := Trim(stmp1);
+  Result := False;
+
+  if CountChr(stmp, '''') = 2 then
+    if stmp[1] = '''' then
+      if stmp[Length(stmp)] = '''' then
+        Result := True;
+end;
+
 function ConvertNaive_Pass1(const sinp: string): string;
 begin
   Result := sinp;
@@ -366,7 +379,6 @@ begin
   Result := StringReplace(Result, '{', ' begin'#13#10, [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, '}'#13#10, ' end;'#13#10, [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, '}', ' end;'#13#10, [rfReplaceAll, rfIgnoreCase]);
-  Result := StringReplace(Result, '"', '''', [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, '/*', '(*', [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, '*/', '*)', [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, '(void)', ';', [rfReplaceAll, rfIgnoreCase]);
@@ -1817,6 +1829,54 @@ begin
       Continue;
     end;
 
+    if stmp[Length(stmp)] = ';' then
+    begin
+      SetLength(stmp, Length(stmp) - 1);
+      stmp0 := ';';
+    end
+    else
+      stmp0 := '';
+
+    stmp := StringReplace(stmp, '"', #255, [rfReplaceAll, rfIgnoreCase]);
+    if CountChr(stmp, #255) = 2 then
+      if (stmp[1] = #255) and (stmp[Length(stmp)] = #255) then
+      begin
+        stmp := StringReplace(stmp, '''', #254, [rfReplaceAll, rfIgnoreCase]);
+        stmp := StringReplace(stmp, #255, '''', [rfReplaceAll, rfIgnoreCase]);
+
+        if isinpascalquote(stmp) then
+        begin
+          if Pos('\n', stmp) > 0 then
+          begin
+            if Pos('\n''', stmp) = Length(stmp) - 2 then
+            begin
+              stmp[Length(stmp) - 2] := '''';
+              stmp[Length(stmp) - 1] := '#';
+              stmp[Length(stmp)] := '1';
+              stmp := stmp + '3#10''';
+              Delete(stmp, 1, 1);
+            end
+            else
+            begin
+              Delete(stmp, 1, 1);
+              SetLength(stmp, Length(stmp) - 1);
+            end;
+            stmp := StringReplace(stmp, '\n', '''#13#10''', [rfReplaceAll, rfIgnoreCase]);
+            stmp := '''' + stmp + '''';
+            stmp := StringReplace(stmp, '''''', '', [rfReplaceAll, rfIgnoreCase]);
+          end;
+          stmp := StringReplace(stmp, #254, '''''', [rfReplaceAll, rfIgnoreCase]);
+          for j := 1 to nspaces do
+            stmp := ' ' + stmp;
+          s2.Add(stmp + stmp0);
+          Continue;
+        end;
+      end;
+
+    stmp := StringReplace(stmp, #255, '''', [rfReplaceAll, rfIgnoreCase]);
+    stmp := StringReplace(stmp, #254, '''', [rfReplaceAll, rfIgnoreCase]);
+
+    stmp := stmp + stmp0;
 
     changed := False;
 
