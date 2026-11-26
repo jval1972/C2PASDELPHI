@@ -555,6 +555,8 @@ begin
   Result := StringReplace(Result, ' true;', ' True;', [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, ' false;', ' False;', [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, ' continue;', ' Continue;', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, ' sizeof(', ' SizeOf(', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '(sizeof(', '(SizeOf(', [rfReplaceAll, rfIgnoreCase]);
 end;
 
 function ConvertNaive_Pass2(const sinp: string): string;
