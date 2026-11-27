@@ -2219,6 +2219,8 @@ begin
 
   stmp0 := StringReplace(sinp, '( not ', '(not ', [rfReplaceAll, rfIgnoreCase]);
   stmp0 := StringReplace(stmp0, '  mod  ', ' mod ', [rfReplaceAll, rfIgnoreCase]);
+  stmp0 := StringReplace(stmp0, #13#10#13#10'begin'#13#10, #13#10'begin'#13#10, [rfReplaceAll, rfIgnoreCase]);
+  stmp0 := StringReplace(stmp0, #13#10#13#10'begin ', #13#10'begin ', [rfReplaceAll, rfIgnoreCase]);
 
   s.Text := stmp0;
 
