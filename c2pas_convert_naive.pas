@@ -1870,6 +1870,24 @@ begin
   end;
 end;
 
+function remove_double_parenthesis(var stmp: string): boolean;
+var
+  p1, p2: Integer;
+begin
+  Result := False;
+
+  p1 := Pos('((', stmp);
+  p2 := Pos('))', stmp);
+  if (p1 > 0) and (p2 > p1) then
+    if (Pos('if ', stmp) > 0) and (Pos(' then', stmp) > 0) then
+      if (CountChr(stmp, '(') = 2) and (CountChr(stmp, ')') = 2) then
+      begin
+        stmp := StringReplace(stmp, '((', '(', [rfReplaceAll, rfIgnoreCase]);
+        stmp := StringReplace(stmp, '))', ')', [rfReplaceAll, rfIgnoreCase]);
+        Result := True;
+      end;
+end;
+
 function ConvertNaive_Pass7(const sinp: string): string;
 var
   s, s2: TStringList;
