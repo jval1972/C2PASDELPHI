@@ -103,6 +103,9 @@ function string2stringlist(const s: string; const c: char): TStringList;
 
 procedure removeblanclines(const sl: TStringList);
 
+function decide(const condition: boolean;
+  const iftrue: string; const iffalse: string): string;
+
 implementation
 
 uses
@@ -574,6 +577,15 @@ begin
   for i := sl.Count - 1 downto 0 do
     if Trim(sl.Strings[i]) = '' then
       sl.Delete(i);
+end;
+
+function decide(const condition: boolean;
+  const iftrue: string; const iffalse: string): string;
+begin
+  if condition then
+    result := iftrue
+  else
+    result := iffalse;
 end;
 
 end.

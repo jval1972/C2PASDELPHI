@@ -283,7 +283,17 @@ end;
 
 procedure joincomment(var sin: string; const scomment: string);
 begin
-  if scomment <> '' then
+  while sin <> '' do
+  begin
+    if sin[Length(sin)] = ' ' then
+      SetLength(sin, Length(sin) - 1)
+    else
+      Break;
+  end;
+
+  if sin = '' then
+    sin := scomment
+  else if scomment <> '' then
     sin := sin + ' ' + scomment;
 end;
 
@@ -2269,6 +2279,7 @@ var
   scomment: string;
   changed: boolean;
   sfront: string;
+  tern_op, inc_op: string;     
 begin
   s := TStringList.Create;
   s2 := TStringList.Create;
@@ -2507,6 +2518,101 @@ begin
             stmp2 := Trim(stmp2);
             stmp3 := Trim(stmp3);
             stmp4 := Trim(stmp4);
+
+            tern_op := '';
+            inc_op := '';
+            if stmp1 <> '' then
+            begin
+              if stmp1[Length(stmp1)] = '+' then
+              begin
+                tern_op := '+';
+                SetLength(stmp1, Length(stmp1) - 1);
+                stmp1 := Trim(stmp1);
+                if stmp1 <> '' then
+                begin
+                  if stmp1[Length(stmp1)] = '+' then
+                  begin
+                    inc_op := '++';
+                    tern_op := '';
+                    SetLength(stmp1, Length(stmp1) - 1);
+                    stmp1 := Trim(stmp1);
+                  end;
+                end;
+              end
+              else if stmp1[Length(stmp1)] = '-' then
+              begin
+                tern_op := '-';
+                SetLength(stmp1, Length(stmp1) - 1);
+                stmp1 := Trim(stmp1);
+                if stmp1 <> '' then
+                begin
+                  if stmp1[Length(stmp1)] = '-' then
+                  begin
+                    inc_op := '--';
+                    tern_op := '';
+                    SetLength(stmp1, Length(stmp1) - 1);
+                    stmp1 := Trim(stmp1);
+                  end;
+                end;
+              end
+              else if stmp1[Length(stmp1)] = '*' then
+              begin
+                tern_op := '*';
+                SetLength(stmp1, Length(stmp1) - 1);
+                stmp1 := Trim(stmp1);
+              end
+              else if stmp1[Length(stmp1)] = '/' then
+              begin
+                tern_op := '/';
+                SetLength(stmp1, Length(stmp1) - 1);
+                stmp1 := Trim(stmp1);
+              end
+              else if stmp1[Length(stmp1)] = '/' then
+              begin
+                tern_op := '/';
+                SetLength(stmp1, Length(stmp1) - 1);
+                stmp1 := Trim(stmp1);
+              end
+              else if stmp1[Length(stmp1)] = '&' then
+              begin
+                tern_op := 'and';
+                SetLength(stmp1, Length(stmp1) - 1);
+                stmp1 := Trim(stmp1);
+              end
+              else if stmp1[Length(stmp1)] = '|' then
+              begin
+                tern_op := 'or';
+                SetLength(stmp1, Length(stmp1) - 1);
+                stmp1 := Trim(stmp1);
+              end
+              else if stmp1[Length(stmp1)] = '^' then
+              begin
+                tern_op := 'xor';
+                SetLength(stmp1, Length(stmp1) - 1);
+                stmp1 := Trim(stmp1);
+              end
+              else if stmp1[Length(stmp1)] = '>' then
+              begin
+                if Length(stmp1) > 2 then
+                  if stmp1[Length(stmp1) - 1] = '>' then
+                  begin
+                    tern_op := 'shr';
+                    SetLength(stmp1, Length(stmp1) - 2);
+                    stmp1 := Trim(stmp1);
+                  end;
+              end
+              else if stmp1[Length(stmp1)] = '<' then
+              begin
+                if Length(stmp1) > 2 then
+                  if stmp1[Length(stmp1) - 1] = '<' then
+                  begin
+                    tern_op := 'shl';
+                    SetLength(stmp1, Length(stmp1) - 2);
+                    stmp1 := Trim(stmp1);
+                  end;
+              end;
+            end;
+
             if (stmp1 <> '') and (stmp2 <> '') and (stmp3 <> '') and (stmp4 <> '') then
               if stmp4[Length(stmp4)] = ';' then
               begin
@@ -2570,10 +2676,22 @@ begin
                     joincomment(stmp, scomment);
                     s2.Add(stmp);
 
+                    if tern_op <> '' then
+                    begin
+                      if not isstructidentifier(stmp3) then
+                        if not issingleidentifier(stmp3) then
+                          if not isinsingleparenthesis(stmp3) then
+                            stmp3 := '(' + stmp3 + ')';
+                      if not isstructidentifier(stmp4) then
+                        if not issingleidentifier(stmp4) then
+                          if not isinsingleparenthesis(stmp4) then
+                            stmp4 := '(' + stmp4 + ')';
+                    end;
+
                     stmp := '';
                     for j := 1 to nspaces + 2 do
-                      stmp := stmp + ' ';
-                    stmp := stmp + stmp1 + ' := ' + stmp3;
+                      stmp := stmp + ' ';             
+                    stmp := stmp + stmp1 + ' := ' + decide(tern_op = '', '', stmp1 + ' ' + tern_op + ' ') + stmp3;
                     s2.Add(stmp);
 
                     stmp := '';
@@ -2585,8 +2703,19 @@ begin
                     stmp := '';
                     for j := 1 to nspaces + 2 do
                       stmp := stmp + ' ';
-                    stmp := stmp + stmp1 + ' := ' + stmp4 + ';';
+                    stmp := stmp + stmp1 + ' := ' + decide(tern_op = '', '', stmp1 + ' ' + tern_op + ' ') + stmp4 + ';';
                     s2.Add(stmp);
+
+                    if inc_op <> '' then
+                    begin
+                      stmp := '';
+                      for j := 1 to nspaces do
+                        stmp := stmp + ' ';
+                      if inc_op[1] = '+' then
+                        stmp := stmp + 'Inc(' + stmp1 + ');'
+                      else if inc_op[1] = '-' then
+                        stmp := stmp + 'Dec(' + stmp1 + ');'
+                    end;
 
                     s3.Free;
                     Continue;
