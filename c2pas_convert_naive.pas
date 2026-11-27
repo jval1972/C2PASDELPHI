@@ -2371,6 +2371,9 @@ begin
       begin
         stmp1 := Trim(s2.Strings[s2.Count - 1]);
         if Pos1('return ', stmp1) then
+        begin
+          splitcomment(stmp1, scomment);
+          stmp1 := Trim(stmp1);
           if (CountChr(stmp1, ';') = 1) and (CountChr(stmp1, '=') = 0) then
             if stmp1[Length(stmp1)] = ';' then
             begin
@@ -2381,6 +2384,7 @@ begin
               stmp1[5] := ' ';
               stmp1[6] := ' ';
               stmp1 := 'Result := ' + Trim(stmp1);
+              joincomment(stmp1, scomment);
               for j := 1 to nspaces + 2 do
                 stmp1 := ' ' + stmp1;
               s2.Strings[s2.Count - 1] := stmp1;
@@ -2389,6 +2393,7 @@ begin
                 stmp1 := ' ' + stmp1;
               s2.Add(stmp1);
             end;
+        end;
       end;
       for j := 1 to nspaces do
         stmp := ' ' + stmp;
