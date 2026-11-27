@@ -2006,15 +2006,22 @@ var
       okdo := False;
       if Pos1('for ', stmp) then
         if Pos(' do', stmp) = 0 then
-          if i < s.Count - 1 then
+        begin
+          if stmp[Length(stmp)] = ')' then
           begin
-            ftmp4 := Trim(s.Strings[i + 1]);
+            stmp := stmp + ' do';
+            okdo := True;
+          end
+          else if i < s.Count - 1 then
+          begin
+           ftmp4 := Trim(s.Strings[i + 1]);
             if Pos1('if ', ftmp4) or Pos1('for ', ftmp4) then
             begin
               stmp := stmp + ' do';
               okdo := True;
             end;
           end;
+        end;
 
       if not okdo then
         Exit;
@@ -2100,7 +2107,7 @@ var
     else
       ipp3 := 0;
 
-    if (ipp1 + ipp2 + ipp3 < 1) and (ipp1 + ipp2 + ipp3 > 2) then
+    if (ipp1 + ipp2 + ipp3 < 1) or (ipp1 + ipp2 + ipp3 > 2) then
       Exit;
 
     if (pp1 > 0) and (pp2 > 0) then
