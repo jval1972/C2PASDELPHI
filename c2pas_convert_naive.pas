@@ -2218,6 +2218,7 @@ begin
   s2 := TStringList.Create;
 
   stmp0 := StringReplace(sinp, '( not ', '(not ', [rfReplaceAll, rfIgnoreCase]);
+  stmp0 := StringReplace(stmp0, '  mod  ', ' mod ', [rfReplaceAll, rfIgnoreCase]);
 
   s.Text := stmp0;
 
