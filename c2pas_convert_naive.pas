@@ -833,6 +833,9 @@ begin
   Result := StringReplace(Result, ' continue;', ' Continue;', [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, ' sizeof(', ' SizeOf(', [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, '(sizeof(', '(SizeOf(', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, ' NULL ', ' nil ', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, ' NULL)', ' nil)', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, ' NULL;', ' nil;', [rfReplaceAll, rfIgnoreCase]);
 end;
 
 function ConvertNaive_Pass2(const sinp: string): string;
