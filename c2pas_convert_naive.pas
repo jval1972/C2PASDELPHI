@@ -1744,11 +1744,104 @@ begin
   s2.Free;
 end;
 
+function remove_single_parenthesis(var stmp: string): boolean;
+var
+  i, j: integer;
+  p1, p2: integer;
+  scheck: string;
+begin
+  Result := False;
+
+  p1 := 0;
+  p2 := 0;
+  for i := 1 to Length(stmp) do
+  begin
+    if stmp[i] = '(' then
+      p1 := i
+    else if stmp[i] = ')' then
+    begin
+      if p1 = 0 then
+        Exit;
+      p2 := i;
+      scheck := '';
+      for j := p1 + 1 to p2 - 1 do
+        scheck := scheck + stmp[j];
+      if not Pos1(STR_PREFIX, scheck) then
+        if issingleidentifier(scheck) or isstructidentifier(scheck) or isidentifier(scheck) then
+          if ((p1 = 1) or (stmp[p1 - 1] in ['(', ' '])) and
+            ((p2 = Length(stmp)) or (stmp[p2 + 1] in [')', ' ', ';'])) then
+          begin
+            Delete(stmp, p2, 1);
+            Delete(stmp, p1, 1);
+            stmp := Trim(stmp);
+            Result := True;
+            remove_single_parenthesis(stmp);
+            Exit;
+          end;
+      p1 := 0;
+      p2 := 0;
+    end;
+  end;
+end;
+
+function remove_extra_parenthesis(var stmp: string): boolean;
+var
+  i, j: integer;
+  p1, p2: integer;
+  depth: integer;
+  scheck, stmp0: string;
+begin
+  Result := False;
+
+  p1 := 0;
+  p2 := 0;
+  depth := 0;
+  for i := 1 to Length(stmp) do
+  begin
+    if depth < -1 then
+      Exit;
+
+    if stmp[i] = '(' then
+    begin
+      Inc(depth);
+      if (depth = 0) and (p1 > 0) then
+      begin
+        p2 := i;
+        scheck := '';
+        for j := p1 + 1 to p2 - 1 do
+          scheck := scheck + stmp[j];
+        scheck := Trim(scheck);
+        if (scheck = 'or') or (scheck = 'and')  or (scheck = 'xor') then
+        begin
+          stmp0 := '';
+          for j := 1 to p1 - 1 do
+            stmp0 := stmp0 + stmp[j];
+          stmp0 := stmp0 + ' ' + scheck + ' ';
+          for j := p2 + 1 to Length(stmp) do
+            stmp0 := stmp0 + stmp[j];
+          stmp := stmp0;
+          Result := True;
+          remove_extra_parenthesis(stmp);
+          Exit;
+        end;
+        p1 := 0;
+        p2 := 0;
+      end;
+    end
+    else if stmp[i] = ')' then
+    begin
+      Dec(depth);
+      if depth = - 1 then
+        p1 := i;
+    end;
+  end;
+end;
+
 function ConvertNaive_Pass7(const sinp: string): string;
 var
   s, s2: TStringList;
   i, j: integer;
-  stmp, token, rest, scomment: string;
+  stmp, stmp0, token, rest, scomment: string;
   p1, p2, p3, start: integer;
   nspaces: integer;
 
@@ -2090,7 +2183,9 @@ begin
   s := TStringList.Create;
   s2 := TStringList.Create;
 
-  s.Text := sinp;
+  stmp0 := StringReplace(sinp, '( not ', '(not ', [rfReplaceAll, rfIgnoreCase]);
+
+  s.Text := stmp0;
 
   for i := 0 to s.Count - 1 do
   begin
@@ -2104,6 +2199,22 @@ begin
         break;
     end;
     stmp := Trim(stmp);
+
+    stmp0 := stmp;
+    splitcomment(stmp0, scomment);
+    if remove_single_parenthesis(stmp0) then
+    begin
+      joincomment(stmp0, scomment);
+      stmp := stmp0;
+    end;
+
+    stmp0 := stmp;
+    splitcomment(stmp0, scomment);
+    if remove_extra_parenthesis(stmp0) then
+    begin
+      joincomment(stmp0, scomment);
+      stmp := stmp0;
+    end;
 
     p1 := 0;
     p2 := 0;
@@ -2311,6 +2422,7 @@ begin
   s2 := TStringList.Create;
 
   stmp0 := StringReplace(sinp, '  do', ' do', [rfReplaceAll, rfIgnoreCase]);
+  stmp0 := StringReplace(stmp0, ' / SizeOf(', ' div SizeOf(', [rfReplaceAll, rfIgnoreCase]);
   s.Text := DecodeStrings(stmp0);
 
   for i := 0 to s.Count - 1 do
