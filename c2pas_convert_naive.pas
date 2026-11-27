@@ -238,7 +238,11 @@ var
   function _split1(const c1, c2: string): boolean;
   var
     ii: integer;
+    dels: TDNumberList;
+    p: Integer;
   begin
+    dels := TDNumberList.Create;
+
     p1 := Pos(c1, sin);
     if p1 > 0 then
     begin
@@ -250,12 +254,27 @@ var
         begin
           scomment := scomment + sin[ii];
           sin[ii] := ' ';
+          dels.Add(ii);
         end;
         Result := True;
+        for ii := dels.Count - 1 downto 0 do
+          Delete(sin, dels.Numbers[ii], 1);
+        p := dels.Numbers[0];
+        if (p > 2) and (p < Length(sin)) then
+        begin
+          if (sin[p - 2] = ' ') and (sin[p - 1] = ' ') then
+            Delete(sin, p - 1, 1)
+          else if (sin[p - 1] = ' ') and (sin[p] = ' ') then
+            Delete(sin, p, 1)
+          else if (sin[p + 1] = ' ') and (sin[p] = ' ') then
+            Delete(sin, p + 1, 1);
+        end;
+        dels.Free;
         Exit;
       end;
     end;
     Result := False;
+    dels.Free;
   end;
 
 begin
@@ -491,10 +510,10 @@ begin
     Exit;
   if CountChr(stmp, '[') <> CountChr(stmp, ']') then
     Exit;
-  if Pos('[', stmp) > 0 then
-    if Pos(']', stmp) < Pos('[', stmp) then
+  if CharPos('[', stmp) > 0 then
+    if CharPos(']', stmp) < CharPos('[', stmp) then
       Exit;
-  if Pos('.', stmp) = 1 then
+  if Pos1('.', stmp) then
     Exit;
 
   Result := True;
@@ -605,8 +624,8 @@ begin
       Continue;
 
     if i < s.Count - 1 then
-      if (Pos('if ', stmp) = 1) or (Pos('for ', stmp) = 1) then
-        if Pos('{', stmp) <= 0 then
+      if Pos1('if ', stmp) or Pos1('for ', stmp) then
+        if CharPos('{', stmp) <= 0 then
         begin
           stmp2 := Trim(s.Strings[i + 1]);
           if stmp2 = '{' then
@@ -615,7 +634,7 @@ begin
             s.Strings[i + 1] := STR_SKIP;
             Continue;
           end;
-          if Pos('{', stmp2) = 1 then
+          if Pos1('{', stmp2) then
           begin
             p := Pos('{', s.Strings[i + 1]);
             if p > 0 then
@@ -663,8 +682,8 @@ begin
 
     stmp1 := Trim(stmp1);
 
-    if (i < s.Count - 3) and ((Pos('if ', stmp1) = 1) or (Pos('else if ', stmp1) = 1) or (Pos('if(', stmp1) = 1) or (Pos('else if(', stmp1) = 1)) then
-      if (Pos('{', stmp1) = 0) and (Pos('}', stmp1) = 0) then
+    if (i < s.Count - 3) and (Pos1('if ', stmp1) or Pos1('else if ', stmp1) or Pos1('if(', stmp1) or Pos1('else if(', stmp1)) then
+      if (CharPos('{', stmp1) = 0) and (CharPos('}', stmp1) = 0) then
       begin
         stmp2 := s.Strings[i + 1];
         nspaces2 := 0;
@@ -676,14 +695,14 @@ begin
             Break;
         end;
         stmp2 := Trim(stmp2);
-        if (Pos('{', stmp2) = 0) and (Pos('}', stmp2) = 0) and (Pos('else', stmp2) = 0) then
+        if (CharPos('{', stmp2) = 0) and (CharPos('}', stmp2) = 0) and (Pos('else', stmp2) = 0) then
         begin
           stmp3 := Trim(s.Strings[i + 2]);
-          if (Pos('else if ', stmp3) = 1) or (Pos('else if(', stmp3) = 1) or (Pos('else ', stmp3) = 1) or (Pos('else(', stmp3) = 1) then
+          if Pos1('else if ', stmp3) or Pos1('else if(', stmp3) or Pos1('else ', stmp3) or Pos1('else(', stmp3) then
           begin
             splitcomment(stmp2, scomment2);
             stmp2 := Trim(stmp2);
-            if Pos(';', stmp2) = Length(stmp2) then
+            if CharPos(';', stmp2) = Length(stmp2) then
             begin
               splitcomment(stmp1, scomment1);
               stmp1 := stmp1 + ' {';
@@ -707,7 +726,7 @@ begin
   for i := 0 to s2.Count - 1 do
   begin
     stmp1 := s2.Strings[i];
-    p := Pos(#255, stmp1);
+    p := CharPos(#255, stmp1);
     if p > 0 then
     begin
       Delete(stmp1, p, 1);
@@ -939,7 +958,7 @@ var
     if endpos = -1 then
       Exit;
 
-    if Pos(',', data) = 0 then
+    if CharPos(',', data) = 0 then
       Exit;
 
     a_items := string2stringlist(data, ',');
@@ -1173,7 +1192,7 @@ begin
     stmp := s.Strings[i];
     changed := False;
     beginhack := False;
-    if Pos('PUBLIC ', Trim(stmp)) = 1 then
+    if Pos1('PUBLIC ', Trim(stmp)) then
     begin
       stmp[1] := ' ';
       stmp[2] := ' ';
@@ -1185,7 +1204,7 @@ begin
       s.Strings[i] := stmp;
       changed := True;
     end
-    else if Pos('PRIVATE ', Trim(stmp)) = 1 then
+    else if Pos1('PRIVATE ', Trim(stmp)) then
     begin
       stmp[1] := ' ';
       stmp[2] := ' ';
@@ -1230,9 +1249,9 @@ begin
       nspaces := 2;
     end;
     stmp := Trim(s.Strings[i]);
-    if Pos('int ', stmp) = 1 then
+    if Pos1('int ', stmp) then
     begin
-      if (Pos('*', stmp) < 1) and (Pos('[', stmp) < 1) then
+      if (CharPos('*', stmp) < 1) and (CharPos('[', stmp) < 1) then
         if stmp[length(stmp)] = ';' then
         begin
           stmp[length(stmp)] := ' ';
@@ -1244,9 +1263,9 @@ begin
           changed := True;
         end;
     end
-    else if Pos('uint32 ', stmp) = 1 then
+    else if Pos1('uint32 ', stmp) then
     begin
-      if (Pos('*', stmp) < 1) and (Pos('[', stmp) < 1) then
+      if (CharPos('*', stmp) < 1) and (CharPos('[', stmp) < 1) then
         if stmp[length(stmp)] = ';' then
         begin
           stmp[length(stmp)] := ' ';
@@ -1261,9 +1280,9 @@ begin
           changed := True;
         end;
     end
-    else if Pos('word ', stmp) = 1 then
+    else if Pos1('word ', stmp) then
     begin
-      if (Pos('*', stmp) < 1) and (Pos('[', stmp) < 1) then
+      if (CharPos('*', stmp) < 1) and (CharPos('[', stmp) < 1) then
         if stmp[length(stmp)] = ';' then
         begin
           stmp[length(stmp)] := ' ';
@@ -1276,9 +1295,9 @@ begin
           changed := True;
         end;
     end
-    else if Pos('longint ', stmp) = 1 then
+    else if Pos1('longint ', stmp) then
     begin
-      if (Pos('*', stmp) < 1) and (Pos('[', stmp) < 1) then
+      if (CharPos('*', stmp) < 1) and (CharPos('[', stmp) < 1) then
         if stmp[length(stmp)] = ';' then
         begin
           stmp[length(stmp)] := ' ';
@@ -1294,9 +1313,9 @@ begin
           changed := True;
         end;
     end
-    else if Pos('FILE ', stmp) = 1 then
+    else if Pos1('FILE ', stmp) then
     begin
-      if (Pos('*', stmp) > 1) and (Pos('[', stmp) < 1) then
+      if (CharPos('*', stmp) > 1) and (CharPos('[', stmp) < 1) then
         if stmp[length(stmp)] = ';' then
         begin
           stmp[length(stmp)] := ' ';
@@ -1312,9 +1331,9 @@ begin
           changed := True;
         end;
     end
-    else if Pos('long long ', stmp) = 1 then
+    else if Pos1('long long ', stmp) then
     begin
-      if (Pos('*', stmp) < 1) and (Pos('[', stmp) < 1) then
+      if (CharPos('*', stmp) < 1) and (CharPos('[', stmp) < 1) then
         if stmp[length(stmp)] = ';' then
         begin
           stmp[length(stmp)] := ' ';
@@ -1332,9 +1351,9 @@ begin
           changed := True;
         end;
     end
-    else if Pos('long ', stmp) = 1 then
+    else if Pos1('long ', stmp) then
     begin
-      if (Pos('*', stmp) < 1) and (Pos('[', stmp) < 1) then
+      if (CharPos('*', stmp) < 1) and (CharPos('[', stmp) < 1) then
         if stmp[length(stmp)] = ';' then
         begin
           stmp[length(stmp)] := ' ';
@@ -1347,9 +1366,9 @@ begin
           changed := True;
         end;
     end
-    else if Pos('#ifdef ', stmp) = 1 then
+    else if Pos1('#ifdef ', stmp) then
     begin
-      if (Pos('<', stmp) < 1) and (Pos('>', stmp) < 1) and (Pos('=', stmp) < 1) then
+      if (CharPos('<', stmp) < 1) and (CharPos('>', stmp) < 1) and (CharPos('=', stmp) < 1) then
       begin
         stmp[1] := ' ';
         stmp[2] := ' ';
@@ -1362,9 +1381,9 @@ begin
         changed := True;
       end;
     end
-    else if Pos('fixed_t ', stmp) = 1 then
+    else if Pos1('fixed_t ', stmp) then
     begin
-      if (Pos('*', stmp) < 1) and (Pos('[', stmp) < 1) then
+      if (CharPos('*', stmp) < 1) and (CharPos('[', stmp) < 1) then
         if stmp[length(stmp)] = ';' then
         begin
           stmp[length(stmp)] := ' ';
@@ -1380,9 +1399,9 @@ begin
           changed := True;
         end;
     end
-    else if Pos('bool ', stmp) = 1 then
+    else if Pos1('bool ', stmp) then
     begin
-      if (Pos('*', stmp) < 1) and (Pos('[', stmp) < 1) then
+      if (CharPos('*', stmp) < 1) and (CharPos('[', stmp) < 1) then
         if stmp[length(stmp)] = ';' then
         begin
           stmp[length(stmp)] := ' ';
@@ -1395,7 +1414,7 @@ begin
           changed := True;
         end;
     end
-    else if (Pos('if (', stmp) = 1) or (Pos('if(', stmp) = 1) then
+    else if Pos1('if (', stmp) or Pos1('if(', stmp) then
     begin
       if (stmp[length(stmp)] = ')') and (Pos(' then ', stmp) = 0) then
       begin
@@ -1407,7 +1426,7 @@ begin
         changed := True;
       end;
     end
-    else if (Pos('while (', stmp) = 1) or (Pos('while(', stmp) = 1) then
+    else if Pos1('while (', stmp) or Pos1('while(', stmp) then
     begin
       if (stmp[length(stmp)] = ')') and (Pos(' do ', stmp) = 0) then
       begin
@@ -1422,7 +1441,7 @@ begin
         changed := True;
       end;
     end
-    else if (Pos('else if (', stmp) = 1) or (Pos('else if(', stmp) = 1) then
+    else if Pos1('else if (', stmp) or Pos1('else if(', stmp) then
     begin
       if i > 0 then
         if Trim(s.Strings[i - 1]) = 'end;' then
@@ -1451,7 +1470,7 @@ begin
 
       joincomment(stmp, scomment);
     end
-    else if Pos('void ', stmp) = 1 then
+    else if Pos1('void ', stmp) then
     begin
       if stmp[length(stmp)] = ';' then
       begin
@@ -1494,7 +1513,7 @@ begin
         stmp := ' ' + stmp;
       changed := True;
     end
-    else if (Pos('''', stmp) = 0) and (Pos('%', stmp) > 0) then
+    else if (CharPos('''', stmp) = 0) and (CharPos('%', stmp) > 0) then
     begin
       stmp := StringReplace(stmp, '%', ' mod ', [rfReplaceAll, rfIgnoreCase]);
       for j := 1 to nspaces do
@@ -1549,8 +1568,8 @@ var
     end;
     if (p1 = 1) and (p2 = 1) then
     begin
-      p1 := Pos('(', stmp);
-      p2 := Pos(')', stmp);
+      p1 := CharPos('(', stmp);
+      p2 := CharPos(')', stmp);
       if p1 < p2 then
       begin
         for xx := 1 to Length(stmp) do
@@ -1585,13 +1604,13 @@ begin
     end;
 
     stmp := Trim(stmp);
-    if (Pos('if ', stmp) = 1) and (Pos(' then', stmp) = Length(stmp) - 4) then
+    if Pos1('if ', stmp) and (Pos(' then', stmp) = Length(stmp) - 4) then
       removeparenthesis
-    else if (Pos('while ', stmp) = 1) and (Pos(' do', stmp) = Length(stmp) - 2) then
+    else if Pos1('while ', stmp) and (Pos(' do', stmp) = Length(stmp) - 2) then
       removeparenthesis
-    else if (Pos('else if ', stmp) = 1) and (Pos(' then', stmp) = Length(stmp) - 4) then
+    else if Pos1('else if ', stmp) and (Pos(' then', stmp) = Length(stmp) - 4) then
       removeparenthesis
-    else if (Pos('case ', stmp) = 1) and (Pos(')', stmp) = Length(stmp)) then
+    else if Pos1('case ', stmp) and (CharPos(')', stmp) = Length(stmp)) then
     begin
       removeparenthesis;
       stmp := stmp + ' of'
@@ -1695,10 +1714,10 @@ begin
     p1 := Pos(':=', stmp);
     if p1 > 0 then
     begin
-      p2 := Pos('(', stmp);
+      p2 := CharPos('(', stmp);
       if (p2 > 0) and (CountChr(stmp, ')') = 1) and (CountChr(stmp, '(') = 1) then
       begin
-        p3 := Pos(')', stmp);
+        p3 := CharPos(')', stmp);
         if (p3 < p2) and (p3 > p1) then
         begin
           stmp2 := stmp;
@@ -1830,12 +1849,12 @@ var
     if last <> 'do' then
     begin
       okdo := False;
-      if Pos('for ', stmp) = 1 then
+      if Pos1('for ', stmp) then
         if Pos(' do', stmp) = 0 then
           if i < s.Count - 1 then
           begin
             ftmp4 := Trim(s.Strings[i + 1]);
-            if (Pos('if ', ftmp4) = 1) or (Pos('for ', ftmp4) = 1) then
+            if Pos1('if ', ftmp4) or Pos1('for ', ftmp4) then
             begin
               stmp := stmp + ' do';
               okdo := True;
@@ -1865,7 +1884,7 @@ var
       Exit;
 
     splitstring(ftmp, s2, s3, ';');
-    if Pos(';', s3) > 0 then
+    if CharPos(';', s3) > 0 then
       Exit;
     if (Pos('++', s3) = 0) and (Pos('--', s3) = 0) then
       Exit;
@@ -1874,7 +1893,7 @@ var
     s2 := Trim(s2);
     s3 := Trim(s3);
 
-    if Pos('int ', s1) = 1 then
+    if Pos1('int ', s1) then
     begin
       splitstring(s1, ftmp, ftmp2);
       ftmp2 := Trim(ftmp2);
@@ -1909,9 +1928,9 @@ var
     if not isidentifier(sfrom) then
       Exit;
 
-    pp1 := Pos('<', s2);
-    pp2 := Pos('>', s2);
-    pp3 := Pos('=', s2);
+    pp1 := CharPos('<', s2);
+    pp2 := CharPos('>', s2);
+    pp3 := CharPos('=', s2);
 
     if pp1 > 0 then
       ipp1 := 1
@@ -1971,12 +1990,12 @@ var
 
       sdiv := #0;
 
-      pp4 := Pos('/', ftmp2);
+      pp4 := CharPos('/', ftmp2);
       if pp4 > 0 then
         sdiv := '/'
       else
       begin
-        pp4 := Pos('\', ftmp2);
+        pp4 := CharPos('\', ftmp2);
         if pp4 > 0 then
           sdiv := '\';
       end;
@@ -2196,7 +2215,7 @@ begin
   sl := string2stringlist(stmp, ' ');
   removeblanclines(sl);
 
-  if (sl.Count = 7) and (Pos('if ', stmp) = 1) then
+  if (sl.Count = 7) and Pos1('if ', stmp) then
     if (sl.strings[2] = 'and') and ((sl.strings[4] = '=') or (sl.strings[4] = '<>')) and (sl.strings[6] = 'then') then
       if isidentifier(sl.Strings[1]) or issingleidentifier(sl.Strings[1]) or isstructidentifier(sl.Strings[1]) then
         if isidentifier(sl.Strings[3]) or issingleidentifier(sl.Strings[3]) or isstructidentifier(sl.Strings[3]) then
@@ -2214,7 +2233,7 @@ begin
             Exit;
           end;
 
-  if (sl.Count = 5) and (Pos('if ', stmp) = 1)  then
+  if (sl.Count = 5) and Pos1('if ', stmp)  then
     if (sl.strings[2] = 'and') and (sl.strings[4] = 'then') then
       if isidentifier(sl.Strings[1]) or issingleidentifier(sl.Strings[1]) or isstructidentifier(sl.Strings[1]) then
         if isidentifier(sl.Strings[3]) or issingleidentifier(sl.Strings[3]) or isstructidentifier(sl.Strings[3]) then
@@ -2231,7 +2250,7 @@ begin
           Exit;
         end;
 
-  if (sl.Count = 8) and (Pos('else if ', stmp) = 1) then
+  if (sl.Count = 8) and Pos1('else if ', stmp) then
     if (sl.strings[3] = 'and') and ((sl.strings[5] = '=') or (sl.strings[5] = '<>')) and (sl.strings[7] = 'then') then
       if isidentifier(sl.Strings[2]) or issingleidentifier(sl.Strings[2]) or isstructidentifier(sl.Strings[2]) then
         if isidentifier(sl.Strings[4]) or issingleidentifier(sl.Strings[4]) or isstructidentifier(sl.Strings[4]) then
@@ -2249,7 +2268,7 @@ begin
             Exit;
           end;
 
-  if (sl.Count = 6) and (Pos('else if ', stmp) = 1)  then
+  if (sl.Count = 6) and Pos1('else if ', stmp)  then
     if (sl.strings[3] = 'and') and (sl.strings[5] = 'then') then
       if isidentifier(sl.Strings[2]) or issingleidentifier(sl.Strings[2]) or isstructidentifier(sl.Strings[2]) then
         if isidentifier(sl.Strings[4]) or issingleidentifier(sl.Strings[4]) or isstructidentifier(sl.Strings[4]) then
@@ -2273,18 +2292,19 @@ function ConvertNaive_Pass8(const sinp: string): string;
 var
   s, s2, s3: TStringList;
   i, j, idx: integer;
-  stmp, stmp0, stmp1, stmp2, stmp3, stmp4, stmp5, stmp6, sident, sname: string;
+  stmp, stmp0, stmp1, stmp2, stmp3, stmp4, stmp5, stmp6, stmp7, sident, sname: string;
   p1, p2, p3, len: integer;
   nspaces, nspaces2: integer;
   scomment: string;
   changed: boolean;
   sfront: string;
-  tern_op, inc_op: string;     
+  tern_op, inc_op: string;
 begin
   s := TStringList.Create;
   s2 := TStringList.Create;
 
-  s.Text := DecodeStrings(sinp);
+  stmp0 := StringReplace(sinp, '  do', ' do', [rfReplaceAll, rfIgnoreCase]);
+  s.Text := DecodeStrings(stmp0);
 
   for i := 0 to s.Count - 1 do
   begin
@@ -2343,7 +2363,7 @@ begin
       if s2.Count > 0 then
       begin
         stmp1 := Trim(s2.Strings[s2.Count - 1]);
-        if Pos('return ', stmp1) = 1 then
+        if Pos1('return ', stmp1) then
           if (CountChr(stmp1, ';') = 1) and (CountChr(stmp1, '=') = 0) then
             if stmp1[Length(stmp1)] = ';' then
             begin
@@ -2420,7 +2440,7 @@ begin
 
     changed := False;
 
-    if Pos('default:', stmp) = 1 then
+    if Pos1('default:', stmp) then
     begin
       stmp[1] := ' ';
       stmp[2] := ' ';
@@ -2435,7 +2455,7 @@ begin
       Changed := True;
     end;
 
-    if Pos('case ', stmp) = 1 then
+    if Pos1('case ', stmp) then
     begin
       len := Length(stmp);
       if (stmp[len - 3] = ' ') and (stmp[len - 2] = ' ') and (stmp[len - 1] = 'o') and (stmp[len] = 'f') then
@@ -2446,7 +2466,7 @@ begin
       end;
     end;
 
-    if Pos('case ', stmp2) = 1 then
+    if Pos1('case ', stmp2) then
     begin
       len := Length(stmp2);
       if (stmp2[len - 2] = ' ') and (stmp2[len - 1] = 'o') and (stmp2[len] = 'f') then
@@ -2456,8 +2476,8 @@ begin
 
     if (CountChr(stmp, '(') = 1) and  (CountChr(stmp, ')') = 1) then
     begin
-      p1 := Pos('(', stmp);
-      p2 := Pos(')', stmp);
+      p1 := CharPos('(', stmp);
+      p2 := CharPos(')', stmp);
       if p1 < p2 then
       begin
         stmp3 := '';
@@ -2489,7 +2509,7 @@ begin
     begin
       // Ternary operator
       p1 := Pos(':=', stmp);
-      p2 := Pos('?', stmp);
+      p2 := CharPos('?', stmp);
 
       stmp0 := stmp;
       splitcomment(stmp, scomment);
@@ -2505,7 +2525,7 @@ begin
 
       if (p1 > 0) and (p2 > p1) and (p3 > p2) and (CountChr(stmp, ':') = 2) and
         (CountChr(stmp, '?') = 1) and (CountChr(stmp, '=') >= 1) and (CountChr(stmp, ';') = 1) and
-        (Pos(';', stmp) = Length(stmp)) then
+        (CharPos(';', stmp) = Length(stmp)) then
       begin
         splitstring(stmp, stmp1, stmp5, ':');
         if Length(stmp5) > 6 then
@@ -2671,6 +2691,17 @@ begin
                   end;
 
                   if stmp2 <> '' then
+                    if (stmp2[1] = '(') and (stmp2[Length(stmp2)] = ')') then
+                    begin
+                      stmp7 := stmp2;
+                      Delete(stmp7, 1, 1);
+                      SetLength(stmp7, Length(stmp7) - 1);
+                      if (CountChr(stmp7, '(') = 1) and (CountChr(stmp7, ')') = 1) and
+                        (CharPos('(', stmp7) < CharPos(')', stmp7)) then
+                          stmp2 := stmp7;
+                    end;
+
+                  if stmp2 <> '' then
                   begin
                     stmp := stmp + 'if ' + stmp2 + ' then';
                     joincomment(stmp, scomment);
@@ -2729,7 +2760,7 @@ begin
       stmp := stmp0;
     end;
 
-    if Pos('&', stmp) > 0 then
+    if CharPos('&', stmp) > 0 then
     begin
       stmp0 := ' &:=  not ';
       p1 := Pos(stmp0, stmp);
@@ -2785,7 +2816,7 @@ begin
         if s3.Count = 1 then
           stmp1 := s3.Strings[0];
 
-        if (s3.Count = 1) and (Pos(';', stmp2) = Length(stmp2)) then
+        if (s3.Count = 1) and (CharPos(';', stmp2) = Length(stmp2)) then
           if issingleidentifier(stmp1) or isidentifier(stmp1) or isstructidentifier(stmp1) or isintidentifier(stmp1) or isinsingleparenthesis(stmp1) then
           begin
             stmp0 := '';
@@ -2827,6 +2858,126 @@ var
   stmp, stmp1, stmp2, stmp3, scomment: string;
   nspaces: integer;
   changed: boolean;
+
+  procedure check_array_var;
+  var
+    stmp1: string;
+    t1, t2: string;
+    fw, sw: string;
+    s_type: string;
+    s_name: string;
+    s_size: string;
+    isstatic, isconst, isstruct: boolean;
+    acomment: string;
+  begin
+    if CharPos('[', stmp) >= CharPos(']', stmp) then
+      Exit;
+
+    if CountChr(stmp, '[') <> 1 then
+      Exit;
+
+    if CountChr(stmp, ']') <> 1 then
+      Exit;
+
+    if CharPos('=', stmp) <> 0 then
+      Exit;
+
+    if CharPos('(', stmp) <> 0 then
+      Exit;
+
+    if CharPos(')', stmp) <> 0 then
+      Exit;
+
+    if CharPos(';', stmp) <> Length(stmp) then
+      Exit;
+
+    isstatic := False;
+    isconst := False;
+    isstruct := False;
+
+    stmp1 := stmp;
+    fw := firstword(stmp1);
+    if fw = 'static' then
+    begin
+      splitstring(stmp1, t1, t2);
+      stmp1 := t2;
+      fw := firstword(stmp1);
+      isstatic := True;
+    end;
+
+    if fw = 'const' then
+    begin
+      splitstring(stmp1, t1, t2);
+      stmp1 := t2;
+      fw := firstword(stmp1);
+      isconst := True;
+    end;
+
+    if fw = 'isstruct' then
+    begin
+      splitstring(stmp1, t1, t2);
+      stmp1 := t2;
+      fw := firstword(stmp1);
+      isstruct := True;
+    end;
+
+    if not issingleidentifier(fw) then
+      Exit;
+
+    splitstring(stmp1, fw, sw);
+    s_type := fw;
+
+    splitstring(sw, t1, t2, '[');
+    if not issingleidentifier(t1) then
+      Exit;
+
+    s_name := t1;
+
+    stmp1 := t2;
+
+    splitstring(t2, fw, sw, ']');
+
+    if sw <> ';' then
+      Exit;
+
+    s_size := fw;
+
+    stmp := '';
+    if isstatic then
+      stmp := stmp + 'static ';
+    if isconst then
+      stmp := stmp + 'const ';
+    if isstruct then
+      stmp := stmp + 'struct ';
+    stmp := stmp + s_name + ': array[0..';
+
+    acomment := '';
+    if IntToStr(StrToIntDef(s_size, 0)) = s_size then
+    begin
+      s_size := IntToStr(StrToIntDef(s_size, 0) - 1);
+      acomment := '// ' + s_size + ' - 1';
+      if scomment <> '' then
+      begin
+        if Pos1('//', scomment) or Pos1('/*', scomment) then
+        begin
+          scomment[1] := ' ';
+          scomment[2] := ' ';
+        end
+        else
+          acomment := acomment + ' ';
+        scomment := acomment + scomment;
+      end;
+    end
+    else if issingleidentifier(s_size) then
+      s_size := s_size + ' - 1'
+    else if isinsingleparenthesis(s_size) then
+      s_size := s_size + ' - 1'
+    else
+      s_size := '(' + s_size + ') - 1';
+
+    stmp := stmp + s_size + '] of ' + s_type + ';';
+  end;
+
 begin
   s := TStringList.Create;
   s2 := TStringList.Create;
@@ -2851,19 +3002,24 @@ begin
 
     changed := False;
 
+    splitcomment(stmp, scomment);
+    stmp := Trim(stmp);
+    check_array_var;
+    joincomment(stmp, scomment);
+
     if (stmp = 'begin') and (i < s.Count - 3) and (s2.Count > 0) then
     begin
       stmp3 := Trim(s2.Strings[s2.Count - 1]);
       splitcomment(stmp3, scomment);
       stmp3 := Trim(stmp3);
-      if ((Pos('if ', stmp3) = 1) and (Pos(' then', stmp3) = Length(stmp3) - 4)) or
-         ((Pos('for ', stmp3) = 1) and (Pos(' do', stmp3) = Length(stmp3) - 2)) or
-         ((stmp3 = 'else') or (Pos('else if ', stmp3) = 1)) then
+      if (Pos1('if ', stmp3) and (Pos(' then', stmp3) = Length(stmp3) - 4)) or
+         (Pos1('for ', stmp3) and (Pos(' do', stmp3) = Length(stmp3) - 2)) or
+         ((stmp3 = 'else') or Pos1('else if ', stmp3)) then
       begin
         stmp1 := Trim(s.Strings[i + 1]);
         splitcomment(stmp1, scomment);
         stmp1 := Trim(stmp1);
-        if (CountChr(stmp1, ';') = 1) and (Pos(';', stmp1) = Length(stmp1)) and (Pos('return ', stmp1) = 0) then
+        if (CountChr(stmp1, ';') = 1) and (CharPos(';', stmp1) = Length(stmp1)) and (Pos('return ', stmp1) = 0) then
         begin
           stmp2 := Trim(s.Strings[i + 2]);
           if ((stmp2 = 'end') or (stmp2 = 'end;')) and (Length(stmp1) >= 2) then
@@ -2884,7 +3040,7 @@ begin
         if (stmp1 = 'end') or (stmp1 = 'end;') then
         begin
           stmp2 := Trim(s.Strings[i + 2]);
-          if (stmp2 = 'else') or (Pos('else if ', stmp2) = 1) then
+          if (stmp2 = 'else') or Pos1('else if ', stmp2) then
           begin
             s.Strings[i + 1] := STR_SKIP;
             Continue;

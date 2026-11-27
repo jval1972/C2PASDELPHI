@@ -96,7 +96,7 @@ function RemoveLineQuotes(const sctext: string): string;
 implementation
 
 uses
-  SysUtils;
+  SysUtils, c2pas_utils;
 
 const
   ASCII_QUOTE = '"';
@@ -477,7 +477,7 @@ begin
       p := Pos('//', stmp);
       if p > 0 then
         stmp := Copy(stmp, 1, p - 1);
-      p := Pos(';', stmp);
+      p := CharPos(';', stmp);
       if p > 0 then
         stmp := Copy(stmp, 1, p - 1);
       if stmp <> '' then

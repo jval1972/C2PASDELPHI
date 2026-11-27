@@ -106,6 +106,10 @@ procedure removeblanclines(const sl: TStringList);
 function decide(const condition: boolean;
   const iftrue: string; const iffalse: string): string;
 
+function Pos1(const subs, s: string): boolean;
+
+function CharPos(const ch: Char; const s: string): integer;
+
 implementation
 
 uses
@@ -138,7 +142,7 @@ begin
   for i := 1 to Length(inp1) do
     if inp1[i] in splitters then
       inp1[i] := ' ';
-  p := Pos(' ', inp1);
+  p := CharPos(' ', inp1);
   if p = 0 then
   begin
     out1 := inp1;
@@ -255,7 +259,7 @@ begin
     if not (s[i] in ['-', '.', '^', '[', ']', 'a'..'z', 'A'..'Z', '0', '1'..'9', '_']) then
       Exit;
 
-  if Pos('-', s) > 1 then
+  if CharPos('-', s) > 1 then
     Exit;
     
   Result := not (s[1] in ['0', '1'..'9']);
@@ -417,7 +421,7 @@ begin
   end;
 
   if IsInteger(s) then
-    if Pos('0x', s) = 1 then
+    if Pos1('0x', s) then
     begin
       s[1] := ' ';
       s[2] := '$';
@@ -586,6 +590,58 @@ begin
     result := iftrue
   else
     result := iffalse;
+end;
+
+function Pos1(const subs, s: string): boolean;
+var
+  len1, len1b, len2: integer;
+  i: integer;
+begin
+  len1 := Length(subs);
+  len2 := Length(s);
+  if len2 < len1 then
+  begin
+    Result := False;
+    Exit;
+  end;
+
+  len1b := len1 - 4;
+  i := 1;
+  while i <= len1b do
+  begin
+    if PLongWord(@subs[i])^ <> PLongWord(@s[i])^ then
+    begin
+      Result := False;
+      Exit;
+    end;
+    Inc(i, 4);
+  end;
+
+  while i <= len1 do
+  begin
+    if subs[i] <> s[i] then
+    begin
+      Result := False;
+      Exit;
+    end;
+    Inc(i);
+  end;
+
+  Result := True;
+end;
+
+
+function CharPos(const ch: Char; const s: string): integer;
+var
+  i: integer;
+begin
+  for i := 1 to Length(s) do
+    if s[i] = ch then
+    begin
+      result := i;
+      exit;
+    end;
+  result := 0;
 end;
 
 end.

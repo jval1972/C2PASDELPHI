@@ -354,12 +354,12 @@ const
 
 function whitespace(c: Char): Boolean;
 begin
-  Result := Pos(c, whitespacestr) > 0;
+  Result := CharPos(c, whitespacestr) > 0;
 end;
 
 function symbol(c: Char): Boolean;
 begin
-  Result := Pos(c, symbolstr) > 0;
+  Result := CharPos(c, symbolstr) > 0;
 end;
 
 function pascalkeyword(const s: string): boolean;
@@ -1387,12 +1387,12 @@ begin
     if _typ = FCT_DEFINE then
     begin
       dowhitespace := False;
-      if Pos('#include ', _str) = 1 then
+      if Pos1('#include ', _str) then
       begin
         _str := c2pas_doReplace(Trim(RightStr(_str, Length(_str) - 9)), '.', '_');
         fparent_l0._fuses.add(removequotes(_str, ['"', '<', '>']));
       end
-      else if Pos('#define ', _str) = 1 then
+      else if Pos1('#define ', _str) then
       begin
         _str := Trim(RightStr(_str, Length(_str) - 8));
         s1 := Trim(firstword(_str));
@@ -1410,7 +1410,7 @@ begin
           dowhitespace := True;
         end;
       end
-      else if Pos('#ifdef ', _str) = 1 then
+      else if Pos1('#ifdef ', _str) then
       begin
         _str := Trim(RightStr(_str, Length(_str) - 6));
         s1 := Trim(firstword(_str));
@@ -1418,7 +1418,7 @@ begin
         Result := Result + '{$IFDEF ' + s1 + '} ' + s2 + #13#10;
         dowhitespace := True;
       end
-      else if Pos('#ifndef ', _str) = 1 then
+      else if Pos1('#ifndef ', _str) then
       begin
         _str := Trim(RightStr(_str, Length(_str) - 7));
         s1 := Trim(firstword(_str));
@@ -1426,7 +1426,7 @@ begin
         Result := Result + '{$IFNDEF ' + s1 + '} ' + s2 + #13#10;
         dowhitespace := True;
       end
-      else if Pos('#endif ', _str) = 1 then
+      else if Pos1('#endif ', _str) then
       begin
         _str := Trim(RightStr(_str, Length(_str) - 6));
         Result := Result + '{$ENDIF} ' + _str + #13#10;
@@ -2002,11 +2002,11 @@ begin
   end;
 
 {  for i := 0 to manager.Count - 2 do
-    if Pos('procedure ', manager.Strings[i]) = 1 then
-      if Pos('begin', manager.Strings[i + 1]) = 1 then
+    if Pos1('procedure ', manager.Strings[i]) then
+      if Pos1('begin', manager.Strings[i + 1]) then
       begin
         stmp := Trim(manager.Strings[i]);
-        if Pos(';', stmp) < 1 then
+        if CharPos(';', stmp) < 1 then
           stmp := stmp + ';';
       end;}
 
@@ -2353,8 +2353,8 @@ begin
     if if_pos1 <> if_pos2 then
       if (if_pos2 = 0) and (then_pos2 = 0) and (if_pos1 > 0) and (then_pos1 > 0) then
       begin
-        pos1 := Pos(')', stmp);
-        pos2 := Pos('(', stmp);
+        pos1 := CharPos(')', stmp);
+        pos2 := CharPos('(', stmp);
         if pos1 < pos2 then
           if pos1 > if_pos1 then
             if pos2 < then_pos1 then
@@ -2750,7 +2750,7 @@ begin
     end;
 
     if stmp[Length(stmp)] = ';' then
-      if Pos('if ', stmp) = 1 then
+      if Pos1('if ', stmp) then
       begin
         p := Pos(' then ', stmp);
         if p > 0 then
@@ -2910,14 +2910,14 @@ var
         Exit;
       expr[Length(expr)] := ' ';
       expr := Trim(expr);
-      if Pos(';', expr) = 0 then
-        if Pos(',', expr) = 0 then
-          if Pos('{', expr) = 0 then
-            if Pos('}', expr) = 0 then
+      if CharPos(';', expr) = 0 then
+        if CharPos(',', expr) = 0 then
+          if CharPos('{', expr) = 0 then
+            if CharPos('}', expr) = 0 then
               if checkbracketsclosed(expr, '(', ')') then
                 if checkbracketsclosed(expr, '[', ']') then
                 begin
-                  if Pos(' ', expr) > 0 then
+                  if CharPos(' ', expr) > 0 then
                     _as_ret := ll.Strings[0] + ' := ' + ll.Strings[0] + ' ' + asgn + ' (' + expr + ');'
                   else
                     _as_ret := ll.Strings[0] + ' := ' + ll.Strings[0] + ' ' + asgn + ' ' + expr + ';';
