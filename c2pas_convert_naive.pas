@@ -2257,23 +2257,12 @@ begin
 
     stmp0 := stmp;
     splitcomment(stmp0, scomment);
-    if remove_single_parenthesis(stmp0) then
-    begin
-      joincomment(stmp0, scomment);
-      stmp := stmp0;
-    end;
-
-    stmp0 := stmp;
-    splitcomment(stmp0, scomment);
-    if remove_extra_parenthesis(stmp0) then
-    begin
-      joincomment(stmp0, scomment);
-      stmp := stmp0;
-    end;
-
-    stmp0 := stmp;
-    splitcomment(stmp0, scomment);
-    if remove_ifthen_parenthesis(stmp0) then
+    ret1 := False;
+    if remove_single_parenthesis(stmp0) then ret1 := True;
+    if remove_extra_parenthesis(stmp0) then ret1 := True;
+    if remove_ifthen_parenthesis(stmp0) then ret1 := True;
+    if remove_double_parenthesis(stmp0) then ret1 := True;
+    if ret1 then
     begin
       joincomment(stmp0, scomment);
       stmp := stmp0;
