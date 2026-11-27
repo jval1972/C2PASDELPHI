@@ -1551,11 +1551,13 @@ var
   stmp: string;
   nspaces: integer;
   changed: boolean;
+  scomment: string;
 
   procedure removeparenthesis;
   var
     xx: integer;
     p1, p2: integer;
+    stmp1: string;
   begin
     p1 := 0;
     p2 := 0;
@@ -1603,6 +1605,8 @@ begin
         break;
     end;
 
+    splitcomment(stmp, scomment);
+
     stmp := Trim(stmp);
     if Pos1('if ', stmp) and (Pos(' then', stmp) = Length(stmp) - 4) then
       removeparenthesis
@@ -1617,7 +1621,10 @@ begin
     end;
 
     if changed then
+    begin
+      joincomment(stmp, scomment);
       s.Strings[i] := stmp;
+    end;
   end;
 
   Result := s.Text;
