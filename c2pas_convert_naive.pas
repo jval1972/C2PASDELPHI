@@ -1837,12 +1837,46 @@ begin
   end;
 end;
 
+function remove_ifthen_parenthesis(var stmp: string): boolean;
+var
+  i, j: integer;
+  p1, p2: integer;
+  scheck, stmp0: string;
+begin
+  Result := False;
+
+  scheck := 'if (';
+  p1 := Pos(scheck, stmp);
+  if p1 <> 1 then
+  begin
+    scheck := 'else if (';
+    p1 := Pos(scheck, stmp);
+  end;
+
+  if p1 = 1 then
+  begin
+    p2 := Pos(') then', stmp);
+    if p2 = Length(stmp) - 5 then
+      if (CountChr(stmp, '(') = 1) and (CountChr(stmp, ')') = 1) then
+      begin
+        stmp0 := '';
+        for j := Length(scheck) + 1 to Length(stmp) - 6 do
+          stmp0 := stmp0 + stmp[j];
+        stmp0 := Trim(stmp0);
+        SetLength(scheck, Length(scheck) - 1);
+        stmp := scheck + stmp0 + ' then';
+        Result := True;
+      end;
+  end;
+end;
+
 function ConvertNaive_Pass7(const sinp: string): string;
 var
   s, s2: TStringList;
   i, j: integer;
   stmp, stmp0, token, rest, scomment: string;
   p1, p2, p3, start: integer;
+  ret1: Boolean;
   nspaces: integer;
 
   function resolve_pointers: boolean;
@@ -2211,6 +2245,14 @@ begin
     stmp0 := stmp;
     splitcomment(stmp0, scomment);
     if remove_extra_parenthesis(stmp0) then
+    begin
+      joincomment(stmp0, scomment);
+      stmp := stmp0;
+    end;
+
+    stmp0 := stmp;
+    splitcomment(stmp0, scomment);
+    if remove_ifthen_parenthesis(stmp0) then
     begin
       joincomment(stmp0, scomment);
       stmp := stmp0;
