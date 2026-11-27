@@ -231,6 +231,207 @@ begin
   cnv_strings.Free;
 end;
 
+function C2Pastype(const s: string): string;
+var
+  s1: string;
+begin
+  s1 := LowerCase(s);
+  if s1 = 'char' then
+    Result := 'Char'
+  else if (s1 = '^char') or (s1 = 'char*') then
+    Result := 'PChar'
+  else if s1 = 'byte' then
+    Result := 'Byte'
+  else if (s1 = '^byte') or (s1 = 'byte*') then
+    Result := 'PByte'
+  else if s1 = 'long' then
+    Result := 'LongInt'
+  else if (s1 = '^long') or (s1 = 'long*') then
+    Result := 'PLongInt'
+  else if s1 = 'int' then
+    Result := 'Integer'
+  else if (s1 = '^int') or (s1 = 'int*') then
+    Result := 'PInteger'
+  else if s1 = 'bool' then
+    Result := 'Boolean'
+  else if (s1 = '^bool') or (s1 = 'bool*') then
+    Result := 'Boolean'
+  else if s1 = 'double' then
+    Result := 'Double'
+  else if (s1 = '^double') or (s1 = 'double*') then
+    Result := 'PDouble'
+  else if s1 = 'float' then
+    Result := 'Single'
+  else if (s1 = '^float') or (s1 = 'float*') then
+    Result := 'PSingle'
+  else if s1 = 'int64_t' then
+    Result := 'int64'
+  else if (s1 = '^int64_t') or (s1 = 'int64_t*') then
+    Result := 'Pint64'
+  else if s1 = 'void*' then
+    Result := 'Pointer'
+  else
+    Result := s;
+end;
+
+function MakeFuncParams(const parms: string): string;
+var
+  sl: TStringList;
+  i, p1: Integer;
+  stmp, t1, t2: string;
+
+  function _make_param(const parm: string): string;
+  var
+    s2: TStringList;
+    isconst: Boolean;
+    isstruct: Boolean;
+    idx, ii: Integer;
+    rest: string;
+  begin
+    Result := Trim(parm);
+
+    s2 := string2stringlist(parm, ' ');
+    removeblanclines(s2);
+    if s2.Count < 2 then
+    begin
+      s2.Free;
+      Exit;
+    end;
+
+    isconst := False;
+    isstruct := False;
+
+    idx := s2.IndexOf('const');
+    if idx > 0 then
+    begin
+      isconst := True;
+      if idx >= s2.Count - 2 then
+      begin
+        s2.Free;
+        Exit;
+      end;
+      s2.Delete(idx);
+    end;
+
+    idx := s2.IndexOf('struct');
+    if idx > 0 then
+    begin
+      isstruct := True;
+      if idx >= s2.Count - 2 then
+      begin
+        s2.Free;
+        Exit;
+      end;
+      s2.Delete(idx);
+    end;
+
+    if s2.Count <> 2 then
+    begin
+      s2.Free;
+      Exit;
+    end;
+
+    Result := '';
+    if isconst then
+      Result := Result + 'const ';
+    if isstruct then
+      Result := Result + '(*struct*) ';
+
+    rest := removeallspaces(s2.Strings[0] + s2.Strings[1]);
+    if Pos1('void*', rest) then
+    begin
+      s2.Strings[0] := 'Pointer';
+      rest[1] := ' ';
+      rest[2] := ' ';
+      rest[3] := ' ';
+      rest[4] := ' ';
+      rest[5] := ' ';
+
+      s2.Strings[1] := Trim(rest);
+    end;
+
+    p1 := CharPos('*', rest);
+    if p1 > 0 then
+    begin
+      t1 := '';
+      for ii := 1 to p1 - 1 do
+        t1 := t1 + rest[ii];
+      t2 := '';
+      for ii := p1 to Length(rest) do
+        t2 := t2 + rest[ii];
+      while CharPos('*', t2) = 1 do
+      begin
+        t1 := '^' + t1;
+        Delete(t2, 1, 1);
+      end;
+      while CharPos('*', t1) = Length(t1) do
+      begin
+        t1 := '^' + t1;
+        Delete(t1, 1, 1);
+      end;
+      t1 := Trim(t1);
+      t2 := Trim(t2);
+      if (t1 = '') or (t2 = '') then
+      begin
+        s2.Free;
+        Exit;
+      end;
+      s2.Strings[0] := t1;
+      s2.Strings[1] := t2;
+    end;
+
+    rest := s2.Strings[1];
+
+    for ii := 1 to Length(rest) do
+    begin
+      if rest[ii] = '*' then
+        rest[ii] := '^'
+      else
+        Break;
+      s2.Strings[1] := rest;
+    end;
+
+    Result := Result + s2.Strings[1] + ': ' + C2Pastype(s2.Strings[0]);
+
+    s2.Free;
+  end;
+
+begin
+  Result := Trim(parms);
+  stmp := Trim(parms);
+
+  if stmp = '' then
+  begin
+    Result := '';
+    Exit;
+  end;
+
+  if stmp = '()' then
+  begin
+    Result := '';
+    Exit;
+  end;
+
+  if stmp[1] = '(' then
+    Delete(stmp, 1, 1);
+
+  if stmp[Length(stmp)] = ')' then
+    SetLength(stmp, Length(stmp) - 1);
+
+  sl := string2stringlist(stmp, ',');
+  stmp := '';
+  for i := 0 to sl.Count - 1 do
+  begin
+    stmp := stmp + _make_param(sl.Strings[i]);
+    if i < sl.Count - 1 then
+      stmp := stmp + '; ';
+  end;
+
+  sl.Free;
+
+  Result := stmp;
+end;
+
 procedure splitcomment(var sin: string; out scomment: string);
 var
   p1, p2: integer;
@@ -340,31 +541,6 @@ begin
     (s1 = 'uint64_t');
 end;
 
-function C2Pastype(const s: string): string;
-var
-  s1: string;
-begin
-  s1 := LowerCase(s);
-  if s1 = 'char' then
-    Result := 'Char'
-  else if s1 = 'byte' then
-    Result := 'Byte'
-  else if s1 = 'long' then
-    Result := 'LongInt'
-  else if s1 = 'int' then
-    Result := 'Integer'
-  else if s1 = 'bool' then
-    Result := 'Boolean'
-  else if s1 = 'double' then
-    Result := 'Double'
-  else if s1 = 'float' then
-    Result := 'Single'
-  else if s1 = 'int64_t' then
-    Result := 'int64'
-  else
-    Result := s;
-end;
-
 function isPastypename(const s: string): boolean;
 var
   s1: string;
@@ -472,6 +648,28 @@ begin
     Exit;
 
   if stmp[1] = '$' then
+    Exit;
+
+  for i := 1 to length(stmp) do
+    if not (stmp[i] in ['A'..'Z']) then
+      if not (stmp[i] in ['a'..'z']) then
+        if not (stmp[i] in ['1'..'9', '0', '_']) then
+          Exit;
+
+  Result := True;
+end;
+
+function issinglevariable(const stmp1: string): boolean;
+var
+  i: integer;
+  stmp: string;
+begin
+  stmp := Trim(stmp1);
+  Result := False;
+  if stmp = '' then
+    Exit;
+
+  if stmp[1] in ['1'..'9', '0'] then
     Exit;
 
   for i := 1 to length(stmp) do
@@ -751,6 +949,12 @@ begin
   Result := StringReplace(Result, #9, '  ', [rfReplaceAll, rfIgnoreCase]);
   Result := replace_else(Result);
   Result := ResolveSingleElseIfs(Result);
+  Result := StringReplace(Result, '(void **)&', '(void **)@', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '(void *)&', '(void *)@', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '(int *)&', '(int *)@', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '(byte *)&', '(byte *)@', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '(char *)&', '(char *)@', [rfReplaceAll, rfIgnoreCase]);
+
   Result := StringReplace(Result, '=&', '=@', [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, '= &', '= @', [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, '=  &', '= @', [rfReplaceAll, rfIgnoreCase]);
@@ -811,7 +1015,7 @@ begin
   Result := StringReplace(Result, '}', ' end;'#13#10, [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, '/*', '(*', [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, '*/', '*)', [rfReplaceAll, rfIgnoreCase]);
-  Result := StringReplace(Result, '(void)', ';', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, '(void)', '();', [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, ';;', ';', [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, '!', ' not ', [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, ' )', ')', [rfReplaceAll, rfIgnoreCase]);
@@ -1556,11 +1760,242 @@ var
   changed: boolean;
   scomment: string;
 
+  procedure _try_function;
+  var
+    stmp0: string;
+    sl: TStringList;
+    isforward, isstatic, isconst, isinline, isstruct, ispointer: Boolean;
+    pidx: Integer;
+    ii, idx: Integer;
+    p1, p2: Integer;
+    s_ret: string;
+    s_rest: string;
+    s_name: string;
+    s_params: string;
+  begin
+    stmp0 := Trim(stmp);
+
+    if Length(stmp0) < 6 then
+      Exit;
+
+    isforward := False;
+    if stmp0[Length(stmp0)] = ';' then
+    begin
+      SetLength(stmp0, Length(stmp0) - 1);
+      stmp0 := Trim(stmp0);
+      if Length(stmp0) < 6 then
+        Exit;
+
+      isforward := True;
+      if i < s.Count - 1 then
+        if (Trim(s.Strings[i + 1]) = 'begin') or Pos1('begin ', s.Strings[i + 1]) then
+          isforward := False;
+
+      if isforward then
+        if i < s.Count - 2 then
+          if (Trim(s.Strings[i + 1]) = '') or Pos1('//', Trim(s.Strings[i + 1])) or Pos1('(*', Trim(s.Strings[i + 1])) then
+            if (Trim(s.Strings[i + 2]) = 'begin') or Pos1('begin ', s.Strings[i + 2]) then
+              isforward := False;
+    end;
+
+    if stmp0[Length(stmp0)] <> ')' then
+      Exit;
+
+    if (CountChr(stmp0, '(') <> 1) or (CountChr(stmp0, ')') <> 1) or
+      (CharPos('.', stmp0) > 0) or (CharPos('?', stmp0) > 0) or
+      (CharPos(':', stmp0) > 0) or (CharPos('=', stmp0) > 0) or
+      (CharPos('<', stmp0) > 0) or (CharPos('>', stmp0) > 0) or
+      (CharPos('$', stmp0) > 0) or (CharPos('/', stmp0) > 0) or
+      (CharPos('+', stmp0) > 0) or (CharPos('-', stmp0) > 0) or
+      (CharPos('.', stmp0) > 0) or (CharPos('@', stmp0) > 0) or
+      (CharPos(';', stmp0) > 0) or (CharPos('&', stmp0) > 0) then
+      Exit;
+
+    sl := string2stringlist(stmp0, ' ');
+    removeblanclines(sl);
+
+    pidx := -1;
+    for ii := 0 to sl.Count - 1 do
+      if CharPos('(', sl.Strings[ii]) > 0 then
+      begin
+        pidx := ii;
+        Break;
+      end;
+
+    if sl.Count < 2 then
+    begin
+      sl.Free;
+      Exit;
+    end;
+
+    isstatic := False;
+    isconst := False;
+    isstruct := False;
+    isinline := False;
+
+    idx := sl.IndexOf('static');
+    if idx > 2 then
+    begin
+      sl.Free;
+      Exit;
+    end;
+    if (idx >= 0) and (idx < pidx) then
+      isstatic := True;
+
+    idx := sl.IndexOf('const');
+    if idx > 2 then
+    begin
+      sl.Free;
+      Exit;
+    end;
+    if (idx >= 0) and (idx < pidx) then
+      isconst := True;
+
+    idx := sl.IndexOf('struct');
+    if idx > Ord(isstatic) + Ord(isconst) + Ord(isinline) then
+    begin
+      sl.Free;
+      Exit;
+    end;
+    if (idx >= 0) and (idx < pidx) then
+      isstruct := True;
+
+    idx := sl.IndexOf('inline');
+    if idx > 2 then
+    begin
+      sl.Free;
+      Exit;
+    end;
+    if (idx >= 0) and (idx < pidx) then
+      isinline := True;
+
+    if isstatic then
+      sl.Delete(sl.IndexOf('static'));
+    if isconst then
+      sl.Delete(sl.IndexOf('const'));
+    if isstruct then
+      sl.Delete(sl.IndexOf('struct'));
+    if isinline then
+      sl.Delete(sl.IndexOf('inline'));
+
+    if sl.Count < 2 then
+    begin
+      sl.Free;
+      Exit;
+    end;
+
+    ispointer := False;
+
+    s_ret := Trim(sl.Strings[0]);
+    if s_ret = '' then
+    begin
+      sl.Free;
+      Exit;
+    end;
+
+    if s_ret[Length(s_ret)] = '*' then
+    begin
+      SetLength(s_ret, Length(s_ret) - 1);
+      s_ret := Trim(sl.Strings[0]);
+      if s_ret = '' then
+      begin
+        sl.Free;
+        Exit;
+      end;
+      ispointer := True;
+    end;
+
+    if not issinglevariable(s_ret) then
+    begin
+      sl.Free;
+      Exit;
+    end;
+
+    s_rest := '';
+    for ii := 1 to sl.Count - 1 do
+    begin
+      s_rest := s_rest + Trim(sl.Strings[ii]);
+      if ii <> sl.Count - 1 then
+        s_rest := s_rest + ' ';
+    end;
+
+    s_rest := Trim(s_rest);
+    p1 := CharPos('(', s_rest);
+    p2 := CharPos(')', s_rest);
+
+    if (p1 < 0) or (p1 < 0) or (p1 > p2) or (p2 <> Length(s_rest)) then
+    begin
+      sl.Free;
+      Exit;
+    end;
+
+    s_name := '';
+    for ii := 1 to p1 - 1 do
+      s_name := s_name + s_rest[ii];
+
+    s_name := Trim(s_name);
+    if s_name = '' then
+    begin
+      sl.Free;
+      Exit;
+    end;
+
+    if s_name[1] = '*' then
+    begin
+      Delete(s_name, 1, 1);
+      s_name := Trim(s_name);
+      if ispointer or (s_name = '') then
+      begin
+        sl.Free;
+        Exit;
+      end;
+      ispointer := True;
+    end;
+
+    if not issinglevariable(s_name) then
+    begin
+      sl.Free;
+      Exit;
+    end;
+
+    s_params := '';
+    for ii := p1 + 1 to p2 - 1 do
+      s_params := s_params + s_rest[ii];
+
+    s_params := MakeFuncParams(s_params);
+
+    if ((s_ret = 'void') or (s_ret = 'procedure')) and not ispointer then
+    begin
+      stmp := 'procedure ' + Trim(s_name) + '(' + s_params + ');'
+    end
+    else
+    begin
+      stmp := 'function ' + Trim(s_name) + '(' + s_params + '): ' + decide(ispointer, '^', '') + C2Pastype(s_ret) + ';';
+    end;
+
+    if isforward then
+      stmp := stmp + ' forward;';
+
+    s_rest := '';
+    if isinline then
+      s_rest := s_rest + 'inline ';
+    if isstatic then
+      s_rest := s_rest + 'static ';
+    if isconst then
+      s_rest := s_rest + 'const ';
+
+    s_rest := Trim(s_rest);
+    if s_rest <> '' then
+      stmp := stmp + ' // ' + s_rest;
+
+    sl.Free;
+    changed := True;
+  end;
+
   procedure removeparenthesis;
   var
     xx: integer;
     p1, p2: integer;
-    stmp1: string;
   begin
     p1 := 0;
     p2 := 0;
@@ -1621,7 +2056,9 @@ begin
     begin
       removeparenthesis;
       stmp := stmp + ' of'
-    end;
+    end
+    else
+      _try_function;
 
     if changed then
     begin
@@ -1842,7 +2279,7 @@ end;
 
 function remove_ifthen_parenthesis(var stmp: string): boolean;
 var
-  i, j: integer;
+  j: integer;
   p1, p2: integer;
   scheck, stmp0: string;
 begin

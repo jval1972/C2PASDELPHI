@@ -110,6 +110,8 @@ function Pos1(const subs, s: string): boolean;
 
 function CharPos(const ch: Char; const s: string): integer;
 
+function removeallspaces(const s: string): string;
+
 implementation
 
 uses
@@ -642,6 +644,16 @@ begin
       exit;
     end;
   result := 0;
+end;
+
+function removeallspaces(const s: string): string;
+var
+  i: Integer;
+begin
+  Result := '';
+  for i := 1 to Length(s) do
+    if s[i] <> ' ' then
+      Result := Result + s[i];
 end;
 
 end.
