@@ -2898,6 +2898,9 @@ var
     if CharPos(';', stmp) <> Length(stmp) then
       Exit;
 
+    if Pos('return ', stmp) <> 0 then
+      Exit;
+
     isstatic := False;
     isconst := False;
     isstruct := False;
