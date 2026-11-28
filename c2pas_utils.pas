@@ -28,7 +28,7 @@ unit c2pas_utils;
 interface
 
 uses
-  Classes;
+  SysUtils, Classes, StrUtils;
 
 type
   charset_t = set of char;
@@ -112,10 +112,9 @@ function CharPos(const ch: Char; const s: string): integer;
 
 function removeallspaces(const s: string): string;
 
-implementation
+function StringReplaceWholeWord(const s_inp, s_old, s_new: string; const flags: TReplaceFlags = [rfReplaceAll, rfIgnoreCase]): string;
 
-uses
-  SysUtils;
+implementation
 
 procedure splitstring(const inp: string; var out1, out2: string; const splitter: string = ' '); overload;
 var
@@ -654,6 +653,69 @@ begin
   for i := 1 to Length(s) do
     if s[i] <> ' ' then
       Result := Result + s[i];
+end;
+
+function StringReplaceWholeWord(const s_inp, s_old, s_new: string; const flags: TReplaceFlags = [rfReplaceAll, rfIgnoreCase]): string;
+var
+  s_text, s_string: string;
+  pidx, pstart, len, inplen: Integer;
+  l_ok, r_ok: Boolean;
+begin
+  len := Length(s_old);
+  if len = 0 then
+  begin
+    Result := s_inp;
+    Exit;
+  end;
+
+  inplen := Length(s_inp);
+  if inplen = 0 then
+  begin
+    Result := '';
+    Exit;
+  end;
+
+  if rfIgnoreCase in flags then
+  begin
+    s_text := UpperCase(s_inp);
+    s_string := UpperCase(Trim(s_old));
+  end
+  else
+  begin
+    s_text := s_inp;
+    s_string := s_old;
+  end;
+
+  Result := '';
+  pstart := 1;
+  pidx := Pos(s_string, s_text);
+
+  while pidx > 0 do
+  begin
+    // Check character before the match
+    l_ok := (pidx = 1) or (not (s_inp[pidx - 1] in ['a'..'z', 'A'..'Z', '0'..'9', '_']));
+    // Check character after the match
+    r_ok := (pidx + len > inplen) or (not (s_inp[pidx + len] in ['a'..'z', 'A'..'Z', '0'..'9', '_']));
+
+    if l_ok and r_ok then
+    begin
+      Result := Result + Copy(s_inp, pstart, pidx - pstart) + s_new;
+      pstart := pidx + len;
+      if not (rfReplaceAll in flags) then
+        Break;
+    end
+    else
+    begin
+      Result := Result + Copy(s_inp, pstart, (pidx - pstart) + 1);
+      pstart := pidx + 1;
+    end;
+
+    pidx := PosEx(s_string, s_text, pstart);
+  end;
+
+  // Append any remaining text
+  if inplen - pstart + 1 > 0 then
+    Result := Result + Copy(s_inp, pstart, inplen - pstart + 1);
 end;
 
 end.
