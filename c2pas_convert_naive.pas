@@ -1821,7 +1821,7 @@ begin
 
       joincomment(stmp, scomment);
     end
-    else if Pos1('void ', stmp) then
+    else if Pos1('void ', stmp) and (CharPos('=', stmp) = 0) and (CharPos('(', stmp) > 0) then
     begin
       if stmp[length(stmp)] = ';' then
       begin
@@ -1844,7 +1844,7 @@ begin
         changed := True;
       end;
     end
-    else if (firstword(stmp) = 'static') and (secondword(stmp) = 'void') then
+    else if (firstword(stmp) = 'static') and (secondword(stmp) = 'void') and (CharPos('=', stmp) = 0) and (CharPos('(', stmp) > 0) then
     begin
       splitstring(stmp, s1, s2);
       splitstring(s2, s1, s3);
