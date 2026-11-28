@@ -2104,7 +2104,11 @@ var
     end
     else
     begin
-      stmp := 'function ' + Trim(s_name) + '(' + s_params + '): ' + decide(ispointer, '^', '') + C2Pastype(s_ret) + ';';
+      stmp := 'function ' + Trim(s_name) + '(' + s_params + '): ';
+      if (s_ret = 'procedure') or (s_ret = 'void') then
+        stmp := stmp + 'Pointer;'
+      else
+        stmp := stmp + decide(ispointer, '^', '') + C2Pastype(s_ret) + ';';
     end;
 
     if isforward then
