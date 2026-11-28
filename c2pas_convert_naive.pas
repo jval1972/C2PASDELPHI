@@ -252,6 +252,10 @@ begin
     Result := 'Integer'
   else if (s1 = '^int') or (s1 = 'int*') then
     Result := 'PInteger'
+  else if s1 = 'short' then
+    Result := 'SmallInt'
+  else if (s1 = '^short') or (s1 = 'short*') then
+    Result := 'PSmallInt'
   else if s1 = 'bool' then
     Result := 'Boolean'
   else if (s1 = '^bool') or (s1 = 'bool*') then
@@ -270,8 +274,107 @@ begin
     Result := 'Pint64'
   else if s1 = 'void*' then
     Result := 'Pointer'
+  else if (s1 = 'file*') or (s1 = '^file') or (s1 = 'FILE') then
+    Result := 'file'
   else
     Result := s;
+end;
+
+procedure Resolve2WordCTypes(const sL: TStringList);
+var
+  s0, s1, s2: string;
+  ii: Integer;
+begin
+  if sL.Count < 2 then
+    Exit;
+
+  for ii := 0 to sl.Count - 2 do
+  begin
+    s0 := LowerCase(sL.Strings[ii]);
+    s1 := LowerCase(sL.Strings[ii + 1]);
+    if ii < sl.Count - 2 then
+      s2 := LowerCase(sL.Strings[ii + 2])
+    else
+      s2 := '';
+
+    if (s0 = 'long') and (s1 = 'long') then
+    begin
+      sL.Delete(ii);
+      sL.Strings[ii] := 'int64';
+      Resolve2WordCTypes(sL);
+      Exit;
+    end
+    else if (s0 = 'longint') and (s1 = 'longint') then
+    begin
+      sL.Delete(ii);
+      sL.Strings[ii] := 'int64';
+      Resolve2WordCTypes(sL);
+      Exit;
+    end
+    else if s0 = 'unsigned' then
+    begin
+      if (s1 = 'long') and (s2 = 'long') then
+      begin
+        sL.Delete(ii);
+        sL.Delete(ii);
+        sL.Strings[ii] := 'UInt64';
+        Resolve2WordCTypes(sL);
+        Exit;
+      end
+      else if (s1 = 'byte') or (s1 = 'char') or (s1 = 'word') or (s1 = 'longword') then
+      begin
+        sL.Delete(ii);
+        Resolve2WordCTypes(sL);
+        Exit;
+      end
+      else if (s1 = 'short') or (s1 = 'smallint') or (s1 = 'word') then
+      begin
+        sL.Delete(ii);
+        if (sL.Strings[ii] = 'int') or (sL.Strings[ii] = 'integer') then
+          if sL.Count > 1 then
+            sL.Delete(ii);
+        sl.Strings[ii] := 'Word';
+        Resolve2WordCTypes(sL);
+        Exit;
+      end
+      else if (s1 = 'int') or (s1 = 'integer')  or (s1 = 'long') or (s1 = 'longint') then
+      begin
+        sL.Delete(ii);
+        sl.Strings[ii] := 'LongWord';
+        Resolve2WordCTypes(sL);
+        Exit;
+      end
+      else if s1 = 'int64' then
+      begin
+        sL.Delete(ii);
+        sL.Strings[ii] := 'UInt64';
+        Resolve2WordCTypes(sL);
+        Exit;
+      end
+      else
+      begin
+        sL.Delete(ii);
+        Resolve2WordCTypes(sL);
+        Exit;
+      end;
+    end
+    else if s0 = 'signed' then
+    begin
+      if (s1 = 'byte') or (s1 = 'char') then
+      begin
+        sL.Delete(ii);
+        sL.Strings[ii] := 'ShortInt';
+        Resolve2WordCTypes(sL);
+        Exit;
+      end
+      else
+      begin
+        sL.Delete(ii);
+        Resolve2WordCTypes(sL);
+        Exit;
+      end;
+    end;
+  end;
 end;
 
 function MakeFuncParams(const parms: string): string;
@@ -302,7 +405,7 @@ var
     isstruct := False;
 
     idx := s2.IndexOf('const');
-    if idx > 0 then
+    if idx >= 0 then
     begin
       isconst := True;
       if idx >= s2.Count - 2 then
@@ -314,7 +417,7 @@ var
     end;
 
     idx := s2.IndexOf('struct');
-    if idx > 0 then
+    if idx >= 0 then
     begin
       isstruct := True;
       if idx >= s2.Count - 2 then
@@ -327,15 +430,19 @@ var
 
     if s2.Count <> 2 then
     begin
-      s2.Free;
-      Exit;
+      Resolve2WordCTypes(s2);
+      if s2.Count <> 2 then
+      begin
+        s2.Free;
+        Exit;
+      end;
     end;
 
     Result := '';
     if isconst then
       Result := Result + 'const ';
     if isstruct then
-      Result := Result + '(*struct*) ';
+      Result := Result + '(*struct*)';
 
     rest := removeallspaces(s2.Strings[0] + s2.Strings[1]);
     if Pos1('void*', rest) then
@@ -429,7 +536,7 @@ begin
 
   sl.Free;
 
-  Result := stmp;
+  Result := Trim(stmp);
 end;
 
 procedure splitcomment(var sin: string; out scomment: string);
@@ -527,6 +634,7 @@ begin
     (s1 = 'byte') or
     (s1 = 'long') or
     (s1 = 'int') or
+    (s1 = 'short') or
     (s1 = 'bool') or
     (s1 = 'double') or
     (s1 = 'float') or
@@ -538,7 +646,8 @@ begin
     (s1 = 'int32_t') or
     (s1 = 'uint32_t') or
     (s1 = 'int64_t') or
-    (s1 = 'uint64_t');
+    (s1 = 'uint64_t') or
+    (s1 = 'FILE');
 end;
 
 function isPastypename(const s: string): boolean;
@@ -551,10 +660,14 @@ begin
     (s1 = 'byte') or
     (s1 = 'longint') or
     (s1 = 'integer') or
+    (s1 = 'word') or
+    (s1 = 'smallint') or
+    (s1 = 'shortint') or
     (s1 = 'boolean') or
     (s1 = 'double') or
     (s1 = 'single') or
-    (s1 = 'int64');
+    (s1 = 'int64') or
+    (s1 = 'file');
 end;
 
 function isidentifier(const stmp1: string): boolean;
@@ -1538,7 +1651,7 @@ begin
           changed := True;
         end;
     end
-    else if Pos1('long long ', stmp) then
+    else if Pos1('long long ', stmp) or Pos1('int64 ', stmp) or Pos1('int64_t ', stmp) then
     begin
       if (CharPos('*', stmp) < 1) and (CharPos('[', stmp) < 1) then
         if stmp[length(stmp)] = ';' then
@@ -1852,7 +1965,7 @@ var
       isconst := True;
 
     idx := sl.IndexOf('struct');
-    if idx > Ord(isstatic) + Ord(isconst) + Ord(isinline) then
+    if idx < Ord(isstatic) + Ord(isconst) + Ord(isinline) then
     begin
       sl.Free;
       Exit;
@@ -1885,6 +1998,8 @@ var
     end;
 
     ispointer := False;
+
+    Resolve2WordCTypes(sl); // SOS
 
     s_ret := Trim(sl.Strings[0]);
     if s_ret = '' then
