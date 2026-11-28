@@ -1152,6 +1152,9 @@ begin
   Result := StringReplace(Result, ' true;', ' True;', [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, ' false;', ' False;', [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, ' continue;', ' Continue;', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, #13#10'continue;', #13#10'Continue;', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, ' break;', ' Break;', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, #13#10'break;', #13#10'Break;', [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, ' sizeof(', ' SizeOf(', [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, '(sizeof(', '(SizeOf(', [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, ' NULL ', ' nil ', [rfReplaceAll, rfIgnoreCase]);
