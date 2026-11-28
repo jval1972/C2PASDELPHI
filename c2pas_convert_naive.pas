@@ -52,6 +52,7 @@ end;
 const
   STR_PREFIX = '___STR_VARIABLE___';
   STR_SKIP = '$SKIP_THIS_LINE';
+  OPEN_ARRAY_FUNC_PARAM = 'const Args: array of const';
 
 function EncodeStrings(const inp: string): string;
 var
@@ -392,6 +393,12 @@ var
     rest: string;
   begin
     Result := Trim(parm);
+
+    if Result = '...' then
+    begin
+      Result := OPEN_ARRAY_FUNC_PARAM;
+      Exit;
+    end;
 
     s2 := string2stringlist(parm, ' ');
     removeblanclines(s2);
@@ -1898,16 +1905,20 @@ var
 
   procedure _try_function;
   var
-    stmp0: string;
+    stmp0, stmpA: string;
     sl: TStringList;
     isforward, isstatic, isconst, isinline, isstruct, ispointer: Boolean;
     pidx: Integer;
     ii, idx: Integer;
     p1, p2: Integer;
+    hasopenarray: boolean;
     s_ret: string;
     s_rest: string;
     s_name: string;
     s_params: string;
+    oavar: string; // Open array variable name
+    oadecl, oastart, oafinish: Integer;
+    oacomment: string;
   begin
     stmp0 := Trim(stmp);
 
@@ -1937,13 +1948,15 @@ var
     if stmp0[Length(stmp0)] <> ')' then
       Exit;
 
+    hasopenarray := (CountChr(stmp0, '.') = 3) and (Pos('...', stmp0) > 0);
+
     if (CountChr(stmp0, '(') <> 1) or (CountChr(stmp0, ')') <> 1) or
-      (CharPos('.', stmp0) > 0) or (CharPos('?', stmp0) > 0) or
-      (CharPos(':', stmp0) > 0) or (CharPos('=', stmp0) > 0) or
-      (CharPos('<', stmp0) > 0) or (CharPos('>', stmp0) > 0) or
-      (CharPos('$', stmp0) > 0) or (CharPos('/', stmp0) > 0) or
-      (CharPos('+', stmp0) > 0) or (CharPos('-', stmp0) > 0) or
-      (CharPos('.', stmp0) > 0) or (CharPos('@', stmp0) > 0) or
+      ((CharPos('.', stmp0) > 0) and not hasopenarray) or
+      (CharPos('?', stmp0) > 0) or (CharPos(':', stmp0) > 0) or
+      (CharPos('=', stmp0) > 0) or (CharPos('<', stmp0) > 0) or
+      (CharPos('>', stmp0) > 0) or (CharPos('$', stmp0) > 0) or
+      (CharPos('/', stmp0) > 0) or (CharPos('+', stmp0) > 0) or
+      (CharPos('-', stmp0) > 0) or (CharPos('@', stmp0) > 0) or
       (CharPos(';', stmp0) > 0) or (CharPos('&', stmp0) > 0) then
       Exit;
 
@@ -2127,6 +2140,158 @@ var
         stmp := stmp + decide(ispointer, '^', '') + C2Pastype(s_ret) + ';';
     end;
 
+    if hasopenarray then
+    begin
+      oavar := '';
+      oadecl := 0;
+      oastart := 0;
+      oafinish := 0;
+      oacomment := '';
+
+      for ii := 1 to 50 do
+      begin
+        if i + ii >= s.Count then
+          Break;
+        stmpA := Trim(s.Strings[i + ii]);
+        splitcomment(stmpA, oacomment);
+        stmpA := Trim(stmpA);
+        if Pos1('va_list ', stmpA) then
+        begin
+          Delete(stmpA, 1, 8);
+          stmpA := Trim(stmpA);
+          if stmpA = '' then
+            Break;
+
+          if not CharPos(';', stmpA) = Length(stmpA) then
+            Break;
+          SetLength(stmpA, Length(stmpA) - 1);
+          stmpA := Trim(stmpA);
+          if stmpA = '' then
+            Break;
+
+          if CharPos(')', stmpA) = Length(stmpA) then
+          begin
+            SetLength(stmpA, Length(stmpA) - 1);
+            stmpA := Trim(stmpA);
+            if stmpA = '' then
+              Break;
+          end;
+
+          if stmpA[1] = '(' then
+            Delete(stmpA, 1, 1);
+          stmpA := Trim(stmpA);
+          if stmpA = '' then
+            Break;
+
+          if not issinglevariable(stmpA) then
+            Break;
+          oavar := stmpA;
+          oadecl := ii;
+          Break;
+        end;
+      end;
+
+      if oadecl > 0 then
+      begin
+        for ii := oadecl + 1 to oadecl + 50 do
+        begin
+          if i + ii >= s.Count then
+            Break;
+          stmpA := Trim(s.Strings[i + ii]);
+          splitcomment(stmpA, oacomment);
+          stmpA := Trim(stmpA);
+          if Pos1('va_start(', stmpA) or Pos1('va_start ', stmpA) then
+          begin
+            Delete(stmpA, 1, 9);
+            stmpA := Trim(stmpA);
+            if stmpA = '' then
+              Break;
+
+            if not CharPos(';', stmpA) = Length(stmpA) then
+              Break;
+            SetLength(stmpA, Length(stmpA) - 1);
+            stmpA := Trim(stmpA);
+            if stmpA = '' then
+              Break;
+
+            if CharPos(')', stmpA) = Length(stmpA) then
+              SetLength(stmpA, Length(stmpA) - 1);
+            stmpA := Trim(stmpA);
+            if stmpA = '' then
+              Break;
+
+            if stmpA[1] = '(' then
+              Delete(stmpA, 1, 1);
+            stmpA := Trim(stmpA);
+            if stmpA = '' then
+              Break;
+
+            if not Pos1(oavar, stmpA) then
+              Break;
+
+            oastart := ii;
+            Break;
+          end;
+        end;
+
+        if oastart > 0 then
+        begin
+          for ii := oastart + 1 to oastart + 50 do
+          begin
+            if i + ii >= s.Count then
+              Break;
+            stmpA := Trim(s.Strings[i + ii]);
+            splitcomment(stmpA, oacomment);
+            stmpA := Trim(stmpA);
+            if Pos1('va_end(', stmpA) or Pos1('va_end ', stmpA) then
+            begin
+              Delete(stmpA, 1, 7);
+              stmpA := Trim(stmpA);
+              if stmpA = '' then
+                Break;
+
+              if not CharPos(';', stmpA) = Length(stmpA) then
+                Break;
+              SetLength(stmpA, Length(stmpA) - 1);
+              stmpA := Trim(stmpA);
+              if stmpA = '' then
+                Break;
+
+              if not CharPos(')', stmpA) = Length(stmpA) then
+                Break;
+              SetLength(stmpA, Length(stmpA) - 1);
+
+              if stmpA[1] = '(' then
+                Delete(stmpA, 1, 1);
+              stmpA := Trim(stmpA);
+              if stmpA = '' then
+                Break;
+
+              if stmpA <> oavar then
+                Break;
+
+              oafinish := ii;
+              Break;
+            end;
+          end;
+        end;
+      end;
+
+      if oavar <> '' then
+      begin
+        stmp := StringReplace(stmp, OPEN_ARRAY_FUNC_PARAM, 'const ' + oavar + ': array of const', [rfReplaceAll, rfIgnoreCase]);
+
+        if oadecl > 0 then
+          s.Strings[i + oadecl] := STR_SKIP;
+
+        if (oastart > 0) and (oafinish > 0) then
+        begin
+          s.Strings[i + oastart] := STR_SKIP;
+          s.Strings[i + oafinish] := STR_SKIP;
+        end;
+      end;
+    end;
+
     if isforward then
       stmp := stmp + ' forward;';
 
@@ -2299,13 +2464,14 @@ begin
       if i > 0 then
       begin
         if nspaces2 >= 2 then
-//          if nspaces >= nspaces2 then
-          nspaces := nspaces2 - 2;
+          if stmp2 <> 'begin' then
       end;
     end
     else if stmp2 = 'begin' then
     begin
       nspaces := nspaces2 + 2;
+      if (stmp = 'end;') or (stmp = 'end') then
+        nspaces := nspaces2
     end;
 
     stmp := Trim(stmp);
