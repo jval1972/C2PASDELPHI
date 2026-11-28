@@ -115,7 +115,7 @@ AutoIncBuild=1
 MajorVer=1
 MinorVer=0
 Release=1
-Build=9
+Build=10
 Debug=0
 PreRelease=0
 Special=0
@@ -126,7 +126,7 @@ CodePage=1252
 [Version Info Keys]
 CompanyName=Jim Valavanis
 FileDescription=C to Pascal conversion
-FileVersion=1.0.1.9
+FileVersion=1.0.1.10
 InternalName=C2PASDELPHI
 LegalCopyright=2026, Jim Valavanis
 LegalTrademarks=2026, Jim Valavanis

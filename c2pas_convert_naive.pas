@@ -1931,6 +1931,9 @@ var
       (CharPos(';', stmp0) > 0) or (CharPos('&', stmp0) > 0) then
       Exit;
 
+    if Pos1('return', stmp0) then
+      Exit;
+      
     sl := string2stringlist(stmp0, ' ');
     removeblanclines(sl);
 
@@ -1954,31 +1957,40 @@ var
     isinline := False;
 
     idx := sl.IndexOf('static');
-    if idx > 2 then
+    if idx < pidx then
     begin
-      sl.Free;
-      Exit;
+      if idx > 2 then
+      begin
+        sl.Free;
+        Exit;
+      end;
+      if (idx >= 0) and (idx < pidx) then
+        isstatic := True;
     end;
-    if (idx >= 0) and (idx < pidx) then
-      isstatic := True;
 
     idx := sl.IndexOf('const');
-    if idx > 2 then
+    if idx < pidx then
     begin
-      sl.Free;
-      Exit;
+      if idx > 2 then
+      begin
+        sl.Free;
+        Exit;
+      end;
+      if (idx >= 0) and (idx < pidx) then
+        isconst := True;
     end;
-    if (idx >= 0) and (idx < pidx) then
-      isconst := True;
 
     idx := sl.IndexOf('struct');
-    if idx < Ord(isstatic) + Ord(isconst) + Ord(isinline) then
+    if idx < pidx then
     begin
-      sl.Free;
-      Exit;
+      if (idx > 0) and (idx < Ord(isstatic) + Ord(isconst) + Ord(isinline)) then
+      begin
+        sl.Free;
+        Exit;
+      end;
+      if (idx >= 0) and (idx < pidx) then
+        isstruct := True;
     end;
-    if (idx >= 0) and (idx < pidx) then
-      isstruct := True;
 
     idx := sl.IndexOf('inline');
     if idx > 2 then
