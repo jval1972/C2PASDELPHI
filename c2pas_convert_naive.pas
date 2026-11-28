@@ -2413,9 +2413,22 @@ end;
 
 function remove_ifthen_parenthesis(var stmp: string): boolean;
 var
-  j: integer;
   p1, p2: integer;
-  scheck, stmp0: string;
+  scheck: string;
+
+  function _get_result: string;
+  var
+    j: integer;
+    stmp0: string;
+  begin
+    stmp0 := '';
+    for j := Length(scheck) + 1 to Length(stmp) - 6 do
+      stmp0 := stmp0 + stmp[j];
+    stmp0 := Trim(stmp0);
+    SetLength(scheck, Length(scheck) - 1);
+    Result := scheck + stmp0 + ' then';
+  end;
+
 begin
   Result := False;
 
@@ -2430,17 +2443,23 @@ begin
   if p1 = 1 then
   begin
     p2 := Pos(') then', stmp);
-    if p2 = Length(stmp) - 5 then
+    if (p2 > 0) and (p2 = Length(stmp) - 5) then
+    begin
       if (CountChr(stmp, '(') = 1) and (CountChr(stmp, ')') = 1) then
       begin
-        stmp0 := '';
-        for j := Length(scheck) + 1 to Length(stmp) - 6 do
-          stmp0 := stmp0 + stmp[j];
-        stmp0 := Trim(stmp0);
-        SetLength(scheck, Length(scheck) - 1);
-        stmp := scheck + stmp0 + ' then';
+        stmp := _get_result;
         Result := True;
+        Exit;
       end;
+      p2 := Pos(')) then', stmp);
+      if p2 = Length(stmp) - 6 then
+        if (CountChr(stmp, '(') = 2) and (CountChr(stmp, ')') = 2) then
+        begin
+          stmp := _get_result;
+          Result := True;
+          Exit;
+        end;
+    end;
   end;
 end;
 
