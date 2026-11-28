@@ -1708,6 +1708,22 @@ begin
         changed := True;
       end;
     end
+    else if Pos1('#ifndef ', stmp) then
+    begin
+      if (CharPos('<', stmp) < 1) and (CharPos('>', stmp) < 1) and (CharPos('=', stmp) < 1) then
+      begin
+        stmp[1] := ' ';
+        stmp[2] := ' ';
+        stmp[3] := ' ';
+        stmp[4] := ' ';
+        stmp[5] := ' ';
+        stmp[6] := ' ';
+        stmp[7] := ' ';
+        stmp := Trim(stmp);
+        stmp := '{$IFNDEF ' + stmp + '}';
+        changed := True;
+      end;
+    end
     else if Pos1('fixed_t ', stmp) then
     begin
       if (CharPos('*', stmp) < 1) and (CharPos('[', stmp) < 1) then
