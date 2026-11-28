@@ -2466,13 +2466,18 @@ begin
       begin
         if nspaces2 >= 2 then
           if stmp2 <> 'begin' then
+            nspaces := nspaces2 - 2
+          else
+            nspaces := nspaces2;
       end;
     end
+
     else if stmp2 = 'begin' then
     begin
-      nspaces := nspaces2 + 2;
       if (stmp = 'end;') or (stmp = 'end') then
         nspaces := nspaces2
+      else
+        nspaces := nspaces2 + 2;
     end;
 
     stmp := Trim(stmp);
