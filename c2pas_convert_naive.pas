@@ -647,7 +647,7 @@ begin
     (s1 = 'uint32_t') or
     (s1 = 'int64_t') or
     (s1 = 'uint64_t') or
-    (s1 = 'FILE');
+    (s1 = 'file');
 end;
 
 function isPastypename(const s: string): boolean;
