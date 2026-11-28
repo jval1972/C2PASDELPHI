@@ -1067,6 +1067,7 @@ begin
   Result := StringReplace(Result, #13#10, #10, [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, #10, #13#10, [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, #9, '  ', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplaceWholeWord(Result, 'printf', 'write', [rfReplaceAll]);
   Result := replace_else(Result);
   Result := ResolveSingleElseIfs(Result);
   Result := StringReplace(Result, '(void **)&', '(void **)@', [rfReplaceAll, rfIgnoreCase]);
