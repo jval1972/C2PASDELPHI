@@ -1950,6 +1950,7 @@ object Form1: TForm1
       ParentFont = False
       ScrollBars = ssBoth
       TabOrder = 0
+      WantTabs = True
       WordWrap = False
     end
     object Memo2: TMemo
@@ -1966,6 +1967,7 @@ object Form1: TForm1
       ParentFont = False
       ScrollBars = ssBoth
       TabOrder = 1
+      WantTabs = True
       WordWrap = False
       OnChange = Memo2Change
     end
