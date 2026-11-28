@@ -1059,14 +1059,31 @@ begin
   s2.Free;
 end;
 
-function ConvertNaive_Pass1(const sinp: string): string;
+function ConvertNaive_Pass0(const sinp: string): string;
 begin
-  Result := EncodeStrings(sinp);
-  Result := MakeBrackets(Result);
+  if sinp = '' then
+  begin
+    Result := '';
+    Exit;
+  end;
+
+  if sinp[Length(sinp)] <> #10 then
+    Result := sinp + #13#10
+  else
+    Result := sinp;
+
+  Result := EncodeStrings(Result);
 
   Result := StringReplace(Result, #13#10, #10, [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, #10, #13#10, [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, #9, '  ', [rfReplaceAll, rfIgnoreCase]);
+
+end;
+
+function ConvertNaive_Pass1(const sinp: string): string;
+begin
+  Result := MakeBrackets(sinp);
+
   Result := StringReplaceWholeWord(Result, 'printf', 'write', [rfReplaceAll]);
   Result := replace_else(Result);
   Result := ResolveSingleElseIfs(Result);
@@ -4036,7 +4053,8 @@ end;
 
 function ConvertNaive(const sinp: string): string;
 begin
-  Result := ConvertNaive_Pass1(sinp);
+  Result := ConvertNaive_Pass0(sinp);
+  Result := ConvertNaive_Pass1(Result);
   Result := ConvertNaive_Pass2(Result);
   Result := ConvertNaive_Pass3(Result);
   Result := ConvertNaive_Pass4(Result);
