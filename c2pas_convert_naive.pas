@@ -1067,6 +1067,10 @@ begin
   Result := StringReplace(Result, '(int *)&', '(int *)@', [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, '(byte *)&', '(byte *)@', [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, '(char *)&', '(char *)@', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, ',  &', ',  @', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, ', &', ', @', [rfReplaceAll, rfIgnoreCase]);
+  Result := StringReplace(Result, ',&', ',@', [rfReplaceAll, rfIgnoreCase]);
+
 
   Result := StringReplace(Result, '=&', '=@', [rfReplaceAll, rfIgnoreCase]);
   Result := StringReplace(Result, '= &', '= @', [rfReplaceAll, rfIgnoreCase]);
